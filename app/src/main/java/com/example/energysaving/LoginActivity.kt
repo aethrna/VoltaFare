@@ -1,9 +1,6 @@
 package com.example.energysaving
-
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
