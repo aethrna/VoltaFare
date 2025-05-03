@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.Energysaving"
         tools:targetApi="31">
@@ -18,15 +18,17 @@
             android:exported="false"
             android:label="@string/title_activity_register"
             android:theme="@style/Theme.Energysaving" />
+        <activity android:name=".LoginActivity"
+            android:exported="false"
+            android:label="LoginActivity"
+            android:theme="@style/Theme.Energysaving" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

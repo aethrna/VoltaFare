@@ -1,7 +1,9 @@
 package com.example.energysaving
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
@@ -15,33 +17,29 @@ class LoginActivity : AppCompatActivity() {
 
         dbHelper = DBHelper(this)
 
-        val usernameEditText = findViewById<EditText>(R.id.usernameEditText)
-        val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
-        val loginButton = findViewById<Button>(R.id.loginButton)
-        val messageTextView = findViewById<TextView>(R.id.messageTextView)
+        val usernameEditText = findViewById<EditText>(R.id.etEmail)
+        val passwordEditText = findViewById<EditText>(R.id.etPassword)
+        val signIn = findViewById<Button>(R.id.btnSignIn)
         val goToRegister = findViewById<TextView>(R.id.goToRegister)
+        val messageText =findViewById<TextView>(R.id.messageText)
         goToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        loginButton.setOnClickListener {
-            val username = usernameEditText.text.toString().trim()
-            val password = passwordEditText.text.toString().trim()
-
-            if (username.isEmpty() || password.isEmpty()) {
-                messageTextView.text = "Please enter both username and password."
-                messageTextView.setTextColor(getColor(android.R.color.holo_red_dark))
+        signIn.setOnClickListener {
+            val email = usernameEditText.text.toString()
+            val password = passwordEditText.text.toString()
+            if (email.isEmpty() || password.isEmpty()) {
+                messageText.text = "Please enter both email and password."
+                messageText.setTextColor(getColor(android.R.color.holo_red_dark))
             } else {
-                val isValid = dbHelper.checkUser(username, password)
+                val isValid = dbHelper.checkUser(email, password)
                 if (isValid) {
-                    messageTextView.setTextColor(getColor(android.R.color.holo_green_dark))
-                    messageTextView.text = "Login successful!"
-                    // Optional: Navigate to home screen
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    messageTextView.setTextColor(getColor(android.R.color.holo_red_dark))
-                    messageTextView.text = "Invalid username or password."
+                    messageText.text = "Invalid email or password"
+                    messageText.setTextColor(getColor(android.R.color.holo_red_dark))
                 }
             }
         }
