@@ -7,16 +7,18 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/icon"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.Energysaving"
+        android:label="Voltafare"
         tools:targetApi="31">
-        <activity android:name=".MainActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
-            android:label="@string/title_activity_register"
             android:theme="@style/Theme.Energysaving" />
         <activity android:name=".LoginActivity"
             android:exported="false"
@@ -24,7 +26,24 @@
             android:theme="@style/Theme.Energysaving" />
         <activity
             android:name=".StartActivity"
-            android:exported="true">
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
+        <activity
+            android:name=".DeviceDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
+        <activity
+            android:name=".DeviceTypeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
+        <activity
+            android:name=".RLog"
+            android:exported="true"
+            android:theme="@style/Theme.Energysaving">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

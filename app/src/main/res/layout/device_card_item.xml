@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#EEEEEE"
+    android:layout_margin="8dp">
+
+    <TextView
+        android:id="@+id/deviceCardTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Device Type"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/deviceCardDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Devices: 3"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/deviceCardEnergyUsage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weekly Usage: 12.5 kWh"
+        android:layout_marginTop="4dp" />
+</LinearLayout>

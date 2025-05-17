@@ -38,7 +38,7 @@ class RegisterActivity : AppCompatActivity() {
                 messageText.text = "All fields are required."
             } else if (password != confirmPassword) {
                 messageText.text = "Passwords do not match."
-            } else if (dbHelper.checkUsernameExists(username)) {
+            } else if (dbHelper.checkEmailExists(username)) {
                 messageText.text = "Username already exists."
             } else {
                 val success = dbHelper.registerUser(username, password)
