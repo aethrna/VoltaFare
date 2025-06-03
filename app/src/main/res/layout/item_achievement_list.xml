@@ -62,7 +62,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="12dp"
-        tools:src="@drawable/ic_check_circle"
+        tools:src="@drawable/baseline_check_box_24"
         tools:ignore="ContentDescription" />
 
 </LinearLayout>
