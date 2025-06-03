@@ -50,7 +50,7 @@ class RegisterActivity : AppCompatActivity() {
             } else if (dbHelper.checkEmailExists(username)) { // Assuming checkEmailExists is for username/email
                 messageText.text = "Username already exists."
             } else {
-                val success = dbHelper.registerUser(username, password)
+                val success = dbHelper.registerUser(username, password, username) // Pass username as initial display name
                 if (success) {
                     // *** IMPORTANT: Clear old session data and reset isNewUser flag ***
                     val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)

@@ -19,6 +19,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 class MainActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DevDBHelper
+    private lateinit var userDbHelper: DBHelper // NEW: Add a reference to your user DB helper
     private lateinit var greetingText: TextView
     private lateinit var imgProfile: ImageView
     private lateinit var weeklyEnergyChart: LineChart
@@ -29,13 +30,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         dbHelper = DevDBHelper(this)
+        userDbHelper = DBHelper(this) // NEW: Initialize your user DB helper
 
         greetingText = findViewById(R.id.tvGreeting)
         imgProfile = findViewById(R.id.imgProfile)
 
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-        val username = prefs.getString("email", "User")
-        greetingText.text = "Hi there, $username"
+        val userEmail = prefs.getString("email", "User") // Get email to fetch profile
+        val currentUserId = prefs.getString("currentUserId", null)
+
+        // NEW: Fetch display name from DBHelper
+        var displayName = userEmail
+        if (currentUserId != null) {
+            val userProfile = userDbHelper.getUserProfile(currentUserId)
+            displayName = userProfile[DBHelper.COLUMN_DISPLAY_NAME] ?: userEmail
+        }
+
+        greetingText.text = "Hi there, $displayName" // Use display name for greeting
         val dateTextView = findViewById<TextView>(R.id.dateTextView)
 
         val currentDate = SimpleDateFormat("EEE, MMM d,yyyy", Locale.getDefault()).format(Date())
@@ -72,6 +83,17 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         setupRecyclerView()
         setupWeeklyEnergyChart() // Refresh chart data on resume
+
+        // Also update the greeting text on resume to reflect any changes made in DashboardActivity
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val userEmail = prefs.getString("email", "User")
+        val currentUserId = prefs.getString("currentUserId", null)
+        var displayName = userEmail
+        if (currentUserId != null) {
+            val userProfile = userDbHelper.getUserProfile(currentUserId)
+            displayName = userProfile[DBHelper.COLUMN_DISPLAY_NAME] ?: userEmail
+        }
+        greetingText.text = "Hi there, $displayName"
     }
 
     private fun setupRecyclerView() {
