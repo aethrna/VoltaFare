@@ -101,20 +101,20 @@ class MainActivity : AppCompatActivity() {
     // In MainActivity.kt
     private fun groupDevices(devices: List<Device>): List<DeviceGroup> {
         val groupedDevices = mutableListOf<DeviceGroup>()
-        // Group by name, or by description if name is "Custom"
-        val typeGroups = devices.groupBy {
-            if (it.name.equals("Custom", ignoreCase = true) && it.description.isNotBlank()) {
-                it.description // Use description as type for "Custom" devices
-            } else {
-                it.name // Use name as type for other devices
-            }
-        }
+
+        // Group by device.name, as it's now structured to be the card title/type.
+        // For a device added as type "Fan" with specific name "Bedroom Fan", device.name will be "Fan".
+        // For a device added as type "Custom" with name "Aquarium Light", device.name will be "Aquarium Light".
+        val typeGroups = devices.groupBy { it.name }
 
         for ((type, devicesOfType) in typeGroups) {
-            // Only sum energy for devices that are ON
+            // Calculate total energy for devices that are ON in this group
             val totalEnergy = devicesOfType
                 .filter { it.isOn }
-                .sumOf { (it.wattUsage / 1000) * it.dailyHours }
+                .sumOf { (it.wattUsage / 1000) * it.dailyHours } // kWh calculation
+
+            // The 'type' here is now the correct string for the card title.
+            // 'devicesOfType' contains all devices belonging to this type/card.
             groupedDevices.add(DeviceGroup(type, devicesOfType, totalEnergy))
         }
         return groupedDevices

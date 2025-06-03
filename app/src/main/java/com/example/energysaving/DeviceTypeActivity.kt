@@ -8,7 +8,7 @@ import androidx.core.content.edit
 
 class DeviceTypeActivity : AppCompatActivity() {
 
-    private val deviceTypes = listOf("Fan", "TV", "Fridge", "AC", "Custom")
+    private val deviceTypes = listOf("Lights", "AC/Heater", "Power Stations", "Entertainment", "Kitchen Appliances", "Custom")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -41,7 +41,7 @@
             android:exported="false"
             android:theme="@style/Theme.Energysaving"/>
         <activity
-            android:name=".DeviceControlActivity"
+            android:name=".DeviceListDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Energysaving"/>
         <activity

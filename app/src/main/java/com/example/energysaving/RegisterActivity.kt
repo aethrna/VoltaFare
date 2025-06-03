@@ -32,7 +32,7 @@ class RegisterActivity : AppCompatActivity() {
             // startActivity(Intent(this, LoginActivity::class.java))
             // finish()
             // Or, if StartActivity is your login/register hub:
-            val intent = Intent(this, StartActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()

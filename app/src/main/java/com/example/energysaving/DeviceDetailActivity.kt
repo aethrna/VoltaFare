@@ -42,11 +42,12 @@ class DeviceDetailActivity : AppCompatActivity() {
             // and 'desc' is the specific description. Adjust as per your intent.
             val desc = etDescription.text.toString().trim()
             val watt = etWatt.text.toString().toDoubleOrNull()
-            val hours = etHours.text.toString().toDoubleOrNull()
+            val hoursGoal = etHours.text.toString().toDoubleOrNull() // This is the dailyHoursGoal
+
 
             // Adjust validation as needed. For example, if 'name' comes from 'selectedDeviceType',
             // it might not need to be checked for blank here if 'selectedDeviceType' is guaranteed.
-            if (name.isBlank() || watt == null || hours == null) {
+            if (name.isBlank() || watt == null || hoursGoal == null) {
                 // Made 'desc' optional in this validation, adjust if it's mandatory
                 Toast.makeText(this, "Name, Wattage, and Hours must be filled correctly", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -73,7 +74,7 @@ class DeviceDetailActivity : AppCompatActivity() {
                 name,
                 desc,
                 watt,
-                hours,
+                hoursGoal,
                 true, // Explicitly setting isOn to true (or use your desired default/logic)
                 currentUserId // Pass the fetched userId
             )
