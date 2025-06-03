@@ -10,4 +10,8 @@ data class Achievement(
     var progressCurrent: Int = 0, // Current progress towards the achievement
     val progressTarget: Int = 1, // Target value to unlock achievement
     val unlockedDate: String = "" // Date unlocked (YYYY-MM-DD)
-)
+) {
+    // Add this computed property
+    val progressPercentage: Int
+        get() = if (progressTarget > 0) (progressCurrent * 100 / progressTarget) else 0
+}

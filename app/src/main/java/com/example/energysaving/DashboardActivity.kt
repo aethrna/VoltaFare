@@ -18,14 +18,15 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var profileImage: ImageView
     private lateinit var tvDisplayName: TextView
     private lateinit var tvDisplayTitle: TextView
-    private lateinit var xpProgressBar: ProgressBar // NEW
-    private lateinit var tvLevelProgress: TextView // NEW
+    private lateinit var xpProgressBar: ProgressBar
+    private lateinit var tvLevelProgress: TextView
     private lateinit var tvDetailDisplayName: TextView
     private lateinit var tvDetailDisplayAchievements: TextView
     private lateinit var tvDetailEmail: TextView
     private lateinit var tvDetailDisplayTitle: TextView
     private lateinit var btnLogout: Button
     private lateinit var dbHelper: DBHelper
+    private lateinit var devDbHelper: DevDBHelper // ADD THIS LINE
 
     private lateinit var recyclerViewAchievements: RecyclerView
     private lateinit var achievementAdapter: AchievementAdapter
@@ -37,13 +38,14 @@ class DashboardActivity : AppCompatActivity() {
         setContentView(R.layout.dashboard_activity)
 
         dbHelper = DBHelper(this)
+        devDbHelper = DevDBHelper(this) // INITIALIZE DEVDBHELPER HERE
 
         // Initialize UI elements
         profileImage = findViewById(R.id.profileImage)
         tvDisplayName = findViewById(R.id.tvDisplayName)
         tvDisplayTitle = findViewById(R.id.tvDisplayTitle)
-        xpProgressBar = findViewById(R.id.xpProgressBar) // NEW
-        tvLevelProgress = findViewById(R.id.tvLevelProgress) // NEW
+        xpProgressBar = findViewById(R.id.xpProgressBar)
+        tvLevelProgress = findViewById(R.id.tvLevelProgress)
         tvDetailDisplayName = findViewById(R.id.tvDetailDisplayName)
         tvDetailDisplayAchievements = findViewById(R.id.tvDetailDisplayAchievements)
         tvDetailEmail = findViewById(R.id.tvDetailEmail)
@@ -57,7 +59,8 @@ class DashboardActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEditDisplayName).setOnClickListener { showEditDialog("Display Name", tvDetailDisplayName.text.toString(), DBHelper.COLUMN_DISPLAY_NAME) }
         findViewById<Button>(R.id.btnEditDisplayTitle).setOnClickListener { showEditDialog("Display Title", tvDetailDisplayTitle.text.toString(), DBHelper.COLUMN_DISPLAY_TITLE) }
         findViewById<Button>(R.id.btnEditDisplayAchievements).setOnClickListener {
-            Toast.makeText(this, "Edit achievements coming soon!", Toast.LENGTH_SHORT).show()
+            // This button might lead to the AchievementsActivity where users can pick which to showcase
+            Toast.makeText(this, "Edit showcased achievements coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         // Profile picture change listener
@@ -92,8 +95,8 @@ class DashboardActivity : AppCompatActivity() {
 
         if (currentUserId != null) {
             val userProfile = dbHelper.getUserProfile(currentUserId)
-            val currentXp = userProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0 // Get XP
-            val currentLevel = userProfile[DBHelper.COLUMN_LEVEL]?.toIntOrNull() ?: 1 // Get Level
+            val currentXp = userProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
+            val currentLevel = userProfile[DBHelper.COLUMN_LEVEL]?.toIntOrNull() ?: 1
 
             tvDisplayName.text = userProfile[DBHelper.COLUMN_DISPLAY_NAME]
             tvDisplayTitle.text = userProfile[DBHelper.COLUMN_DISPLAY_TITLE]
@@ -102,19 +105,16 @@ class DashboardActivity : AppCompatActivity() {
             tvDetailEmail.text = userProfile[DBHelper.COLUMN_EMAIL]
             tvDetailDisplayTitle.text = userProfile[DBHelper.COLUMN_DISPLAY_TITLE]
 
-            // Calculate progress for XP bar
             val xpNeededForNextLevel = calculateXpForLevel(currentLevel + 1)
             val xpForCurrentLevel = calculateXpForLevel(currentLevel)
-            val xpProgressInCurrentLevel = currentXp - xpForCurrentLevel // XP accumulated in current level
-            val xpNeededInCurrentLevel = xpNeededForNextLevel - xpForCurrentLevel // Total XP span for current level
+            val xpProgressInCurrentLevel = currentXp - xpForCurrentLevel
+            val xpNeededInCurrentLevel = xpNeededForNextLevel - xpForCurrentLevel
 
-            xpProgressBar.max = xpNeededInCurrentLevel // Max value for the progress bar
-            xpProgressBar.progress = xpProgressInCurrentLevel // Current progress within this level
+            xpProgressBar.max = xpNeededInCurrentLevel
+            xpProgressBar.progress = xpProgressInCurrentLevel
 
-            tvLevelProgress.text = "Level $currentLevel ($currentXp / $xpNeededForNextLevel XP to next level)" // Display text
+            tvLevelProgress.text = "Level $currentLevel ($currentXp / $xpNeededForNextLevel XP to next level)"
 
-
-            // Load profile image
             val imageUriString = userProfile[DBHelper.COLUMN_PROFILE_IMAGE_URI]
             if (!imageUriString.isNullOrBlank()) {
                 try {
@@ -139,30 +139,44 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    // Define XP progression logic (e.g., exponential)
     private fun calculateXpForLevel(level: Int): Int {
         return when (level) {
             1 -> 0
-            2 -> 100 // XP needed to reach level 2 (from 0 to 99)
-            3 -> 250 // XP needed to reach level 3 (from 100 to 249)
+            2 -> 100
+            3 -> 250
             4 -> 450
             5 -> 700
             else -> {
-                // Example: simple exponential growth
-                (50 * (level - 1) * (level - 1)) + (50 * (level - 1)) + 100 // Adjust formula as needed
+                (50 * (level - 1) * (level - 1)) + (50 * (level - 1)) + 100
             }
         }
     }
 
-
     private fun loadShowcasedAchievements() {
-        val achievements = listOf(
-            Achievement("The Lorax", "Consistent top-tier performance", 85, R.mipmap.ic_launcher_round), // Replace with actual icons
-            Achievement("Eco Curious", "Try and experience every feature in VoltaFare", 67, R.mipmap.ic_launcher_round),
-            Achievement("Plugged In", "Log your first Device", 93, R.mipmap.ic_launcher_round)
-        )
-        achievementAdapter = AchievementAdapter(achievements)
-        recyclerViewAchievements.adapter = achievementAdapter
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val currentUserId = prefs.getString("currentUserId", null)
+
+        if (currentUserId != null) {
+            val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
+            val unlockedAchievements = allAchievements.filter { it.isUnlocked }
+
+            if (unlockedAchievements.isEmpty()) {
+                // Optionally display a message if no achievements are unlocked
+                // For example: tvShowcasedAchievementsTitle.text = "No achievements unlocked yet."
+                // And hide recyclerViewAchievements or show a placeholder.
+                // For now, just set an empty adapter.
+                achievementAdapter = AchievementAdapter(emptyList())
+            } else {
+                // Limit the number of showcased achievements if desired, e.g., .take(3)
+                achievementAdapter = AchievementAdapter(unlockedAchievements)
+            }
+            recyclerViewAchievements.adapter = achievementAdapter
+        } else {
+            // Handle case where user is not identified, e.g., set empty adapter
+            achievementAdapter = AchievementAdapter(emptyList())
+            recyclerViewAchievements.adapter = achievementAdapter
+            Toast.makeText(this, "Cannot load achievements: User not identified.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showEditDialog(title: String, currentValue: String, dbColumnName: String) {
