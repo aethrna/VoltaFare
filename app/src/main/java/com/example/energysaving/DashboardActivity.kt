@@ -57,7 +57,10 @@ class DashboardActivity : AppCompatActivity() {
 
         // Set up click listeners for "Edit" buttons
         findViewById<Button>(R.id.btnEditDisplayName).setOnClickListener { showEditDialog("Display Name", tvDetailDisplayName.text.toString(), DBHelper.COLUMN_DISPLAY_NAME) }
-        findViewById<Button>(R.id.btnEditDisplayTitle).setOnClickListener { showEditDialog("Display Title", tvDetailDisplayTitle.text.toString(), DBHelper.COLUMN_DISPLAY_TITLE) }
+        // MODIFIED: Changed behavior for btnEditDisplayTitle to open achievement selection dialog
+        findViewById<Button>(R.id.btnEditDisplayTitle).setOnClickListener {
+            showAchievementTitleSelectionDialog()
+        }
         findViewById<Button>(R.id.btnEditDisplayAchievements).setOnClickListener {
             // This button might lead to the AchievementsActivity where users can pick which to showcase
             Toast.makeText(this, "Edit showcased achievements coming soon!", Toast.LENGTH_SHORT).show()
@@ -141,13 +144,14 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun calculateXpForLevel(level: Int): Int {
         return when (level) {
-            1 -> 0
-            2 -> 100
-            3 -> 250
-            4 -> 450
-            5 -> 700
+            1 -> 0 // Starts at 0 XP
+            2 -> 5 // Only 5 XP needed for Level 2 for testing
+            3 -> 15 // Example: 15 XP for Level 3
+            4 -> 30
+            5 -> 50
             else -> {
-                (50 * (level - 1) * (level - 1)) + (50 * (level - 1)) + 100
+                // Your exponential or linear formula for higher levels
+                50 + (level - 5) * 20 // Example: 20 XP per level after 5
             }
         }
     }
@@ -211,6 +215,58 @@ class DashboardActivity : AppCompatActivity() {
         builder.show()
     }
 
+    /**
+     * Shows a dialog allowing the user to select an unlocked achievement title as their display title.
+     */
+    private fun showAchievementTitleSelectionDialog() {
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val currentUserId = prefs.getString("currentUserId", null)
+
+        if (currentUserId == null) {
+            Toast.makeText(this, "User not identified. Cannot select title.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
+        val unlockedAchievements = allAchievements.filter { it.isUnlocked }
+
+        if (unlockedAchievements.isEmpty()) {
+            Toast.makeText(this, "No achievements unlocked yet to use as a title!", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Extract just the titles from the unlocked achievements
+        val achievementTitles = unlockedAchievements.map { it.title }.toTypedArray()
+
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Select Display Title")
+        builder.setItems(achievementTitles) { dialog, which ->
+            val selectedTitle = achievementTitles[which]
+            updateDisplayTitle(selectedTitle) // Call the helper to update the database and UI
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
+    }
+
+    /**
+     * Updates the user's display title in the database and refreshes the UI.
+     */
+    private fun updateDisplayTitle(newTitle: String) {
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val currentUserId = prefs.getString("currentUserId", null)
+        if (currentUserId != null) {
+            if (dbHelper.updateUserProfileField(currentUserId, DBHelper.COLUMN_DISPLAY_TITLE, newTitle)) {
+                Toast.makeText(this, "Display Title updated successfully!", Toast.LENGTH_SHORT).show()
+                loadUserProfile() // Reload to update the displayed title
+            } else {
+                Toast.makeText(this, "Failed to update Display Title.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun performLogout() {
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         prefs.edit {
@@ -234,16 +290,35 @@ class DashboardActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
             val imageUri: Uri? = data.data
             imageUri?.let { uri ->
+                // *** IMPORTANT FIX: Take persistent URI permission ***
+                val contentResolver = applicationContext.contentResolver
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                try {
+                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                } catch (e: SecurityException) {
+                    // Handle cases where permission cannot be taken (e.g., system doesn't support it for this URI)
+                    Toast.makeText(this, "Failed to get persistent access to image. Please try another image or grant permissions manually.", Toast.LENGTH_LONG).show()
+                    e.printStackTrace()
+                    return // Exit if persistent permission can't be obtained
+                }
+                // *** End of FIX ***
+
                 val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
                 val currentUserId = prefs.getString("currentUserId", null)
                 if (currentUserId != null) {
                     if (dbHelper.updateUserProfileField(currentUserId, DBHelper.COLUMN_PROFILE_IMAGE_URI, uri.toString())) {
-                        val imageStream: InputStream? = contentResolver.openInputStream(uri)
-                        val selectedImage = BitmapFactory.decodeStream(imageStream)
-                        profileImage.setImageBitmap(selectedImage)
-                        Toast.makeText(this, "Profile picture updated!", Toast.LENGTH_SHORT).show()
+                        try {
+                            val imageStream: InputStream? = contentResolver.openInputStream(uri)
+                            val selectedImage = BitmapFactory.decodeStream(imageStream)
+                            profileImage.setImageBitmap(selectedImage)
+                            Toast.makeText(this, "Profile picture updated!", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Error displaying image: ${e.message}", Toast.LENGTH_LONG).show()
+                            profileImage.setImageResource(R.mipmap.ic_launcher_round) // Fallback
+                            e.printStackTrace()
+                        }
                     } else {
-                        Toast.makeText(this, "Failed to save profile picture.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to save profile picture URI.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(this, "User not identified, cannot save picture.", Toast.LENGTH_SHORT).show()

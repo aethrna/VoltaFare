@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         greetingText.text = "Hi there, $displayName" // Use display name for greeting
         val dateTextView = findViewById<TextView>(R.id.dateTextView)
 
-        val currentDate = SimpleDateFormat("EEE, MMM d,yyyy", Locale.getDefault()).format(Date())
+        val currentDate = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault()).format(Date())
         dateTextView.text = currentDate
 
         imgProfile.setOnClickListener {

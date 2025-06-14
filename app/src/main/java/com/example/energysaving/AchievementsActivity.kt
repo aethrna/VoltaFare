@@ -218,14 +218,14 @@ class AchievementsActivity : AppCompatActivity() {
     // This function needs to be consistent with the one in DashboardActivity
     private fun calculateXpForLevel(level: Int): Int {
         return when (level) {
-            1 -> 0 // XP needed to be level 1 (starts at 0)
-            2 -> 100 // XP needed to reach level 2 (from 100 to 249 for level 3)
-            3 -> 250
-            4 -> 450
-            5 -> 700
+            1 -> 0 // Starts at 0 XP
+            2 -> 5 // Only 5 XP needed for Level 2 for testing
+            3 -> 15 // Example: 15 XP for Level 3
+            4 -> 30
+            5 -> 50
             else -> {
-                // Example: simple exponential growth
-                (50 * (level - 1) * (level - 1)) + (50 * (level - 1)) + 100 // Adjust formula as needed
+                // Your exponential or linear formula for higher levels
+                50 + (level - 5) * 20 // Example: 20 XP per level after 5
             }
         }
     }
