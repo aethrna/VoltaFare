@@ -26,6 +26,10 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+
         signIn.setOnClickListener {
             val email = usernameEditText.text.toString()
             val password = passwordEditText.text.toString()

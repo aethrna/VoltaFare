@@ -5,16 +5,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@drawable/homepage">
 
     <TextView
         android:id="@+id/tvGreeting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="104dp"
         android:text="Hi there, Debug"
-        android:textSize="18sp"
+        android:textSize="32sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:fontFamily="@font/nunito_regular"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,21 +25,21 @@
         android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="88dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="84dp"
+        android:fontFamily="@font/nunito_regular"
         android:text="DATE_DEBUG"
+        android:textColor="#B1B1B1"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Bottom Navigation -->
 
     <ImageView
         android:id="@+id/imgProfile"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="24dp"
         android:src="@mipmap/ic_launcher"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -47,7 +50,7 @@
         android:layout_height="235dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavCoordinator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,69 +62,172 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="84dp"
-        android:layout_marginBottom="392dp"
+        android:layout_marginBottom="356dp"
+        android:fontFamily="@font/nunito_regular"
         android:text="This Week's Energy Consumption"
+        android:textColor="#163D6A"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.022"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/weeklyEnergyChart"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavCoordinator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.804" />
 
-    <LinearLayout
-        android:id="@+id/bottomNav"
-        android:layout_width="0dp"
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/bottomNavCoordinator"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:weightSum="5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
-            android:id="@+id/btnAchievements"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Achiev." />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <Button
-            android:id="@+id/btnRecommendations"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Recomm." />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout_editor_absoluteX="205dp"
+        tools:layout_editor_absoluteY="760dp" />
 
-        <Button
-            android:id="@+id/btnAddDevice"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Add Device"
+        android:src="@drawable/nav_add"
+        app:backgroundTint="@color/blue_fab"
+        app:fabSize="normal"
+        app:tint="@android:color/white"
+        tools:layout_editor_absoluteX="177dp"
+        tools:layout_editor_absoluteY="782dp" />
 
-        <Button
-            android:id="@+id/btnHome"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Home" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:background="@drawable/nav_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:weightSum="4"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="821dp">
 
-        <Button
-            android:id="@+id/btnProfile"
+        <LinearLayout
+            android:id="@+id/navItemAchievements"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Profile" />
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Achievements"
+                android:src="@drawable/nav_achiev" />
+
+            <View
+                android:id="@+id/indicatorAchievements"
+                android:layout_width="24dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navItemRecommendations"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Recommendations"
+                android:src="@drawable/nav_rec" />
+
+            <View
+                android:id="@+id/indicatorRecommendations"
+                android:layout_width="24dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navItemHome"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Home"
+                android:src="@drawable/nav_home" />
+
+            <View
+                android:id="@+id/indicatorHome"
+                android:layout_width="24dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/glow_indc" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navItemProfile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Profile"
+                android:src="@drawable/nav_profile" />
+
+            <View
+                android:id="@+id/indicatorProfile"
+                android:layout_width="24dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

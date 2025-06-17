@@ -49,6 +49,10 @@
             android:exported="false"
             android:theme="@style/Theme.Energysaving"/>
         <activity
+            android:name=".RecommendationsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Energysaving"/>
+        <activity
             android:name=".RLog"
             android:exported="true"
             android:theme="@style/Theme.Energysaving">

@@ -1,40 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- res/layout/device_detail_activity.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@drawable/bg_darkstart">
+
+    <TextView
+        android:id="@+id/tvAddNewDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:fontFamily="@font/nunito_regular"
+        android:text="ADD A NEW DEVICE"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.208"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.192" />
 
     <EditText
         android:id="@+id/etDeviceName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Device Name" />
+        android:layout_width="296dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="232dp"
+        android:background="@drawable/textbox_1"
+        android:fontFamily="@font/nunito_regular"
+        android:hint="ENTER DEVICE NAME"
+        android:paddingLeft="16dp"
+        android:textColorHint="@color/black"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etDeviceDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Description" />
+        android:layout_width="296dp"
+        android:layout_height="97dp"
+        android:layout_marginTop="276dp"
+        android:background="@drawable/desc_box"
+        android:fontFamily="@font/nunito_regular"
+        android:gravity="start"
+        android:hint="ENTER DEVICE DESCRIPTION"
+        android:paddingStart="16dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="16dp"
+        android:textColorHint="@color/black"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etWattUsage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Watt Usage"
-        android:inputType="numberDecimal" />
+        android:layout_width="296dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="380dp"
+        android:background="@drawable/textbox_1"
+        android:fontFamily="@font/nunito_regular"
+        android:hint="WATT USAGE"
+        android:inputType="numberDecimal"
+        android:paddingLeft="16dp"
+        android:textColorHint="@color/black"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etDailyHours"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Daily Usage (hours)"
-        android:inputType="numberDecimal" />
+        android:layout_width="296dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="424dp"
+        android:background="@drawable/textbox_1"
+        android:fontFamily="@font/nunito_regular"
+        android:hint="DAILY USAGE GOAL (Hours)"
+        android:inputType="numberDecimal"
+        android:paddingLeft="16dp"
+        android:textColorHint="@color/black"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnSubmitDevice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Device" />
-</LinearLayout>
+        android:layout_width="159dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="736dp"
+        android:background="@drawable/buttonlight"
+        android:paddingBottom="10dp"
+        android:text="ADD DEVICE"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

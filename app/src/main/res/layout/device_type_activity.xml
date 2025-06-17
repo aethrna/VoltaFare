@@ -1,25 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/device_type_activity.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@drawable/bg_darkstart">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select Device Type" />
-
-    <ListView
-        android:id="@+id/deviceTypeList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+    android:id="@+id/tvAddNewDevice"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="ADD A NEW DEVICE"
+    android:textColor="@color/white"
+    android:fontFamily="@font/nunito_regular"
+    android:paddingTop="210dp"
+    android:paddingBottom="15dp"
+    android:paddingLeft="65dp"
+    android:layout_alignParentTop="true"/>
 
     <Button
         android:id="@+id/btnFinish"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
+        android:layout_height="49dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" android:layout_marginBottom="250dp" android:background="@drawable/buttonlight"
+        android:fontFamily="@font/nunito_regular"
+        android:text="Finish"
+        android:paddingBottom="10dp"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:backgroundTint="@null" />
+
+    <LinearLayout
+        android:id="@+id/collapsibleHeader"
+        android:layout_width="285dp"
+        android:layout_height="34dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/dropdown_menu"
+        android:layout_below="@id/tvAddNewDevice" android:layout_centerHorizontal="true" android:layout_marginTop="20dp" android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="SELECT YOUR DEVICE TYPE"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunito_regular"/>
+
+        <ImageView
+            android:id="@+id/imgExpandCollapseArrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Expand/Collapse"
+            android:src="@drawable/arrow_down" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/deviceCategoryRecyclerView"
+        android:layout_width="285dp"
         android:layout_height="wrap_content"
-        android:text="Finish" />
-</LinearLayout>
+        android:layout_below="@id/collapsibleHeader" android:layout_above="@id/btnFinish" android:layout_centerHorizontal="true" android:background="@drawable/dropdown_menu_e"
+        android:visibility="gone"
+        android:layout_marginBottom="24dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+</RelativeLayout>

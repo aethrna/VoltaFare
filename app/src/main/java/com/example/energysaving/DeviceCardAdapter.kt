@@ -2,6 +2,7 @@
 package com.example.energysaving
 
 import android.content.Intent // Make sure Intent is imported
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

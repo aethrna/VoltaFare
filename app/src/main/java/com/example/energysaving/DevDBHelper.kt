@@ -619,4 +619,16 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
 
         return dailyData.toSortedMap()
     }
+
+    fun deleteDevice(deviceId: Int, userId: String): Int {
+        val db = this.writableDatabase
+        val rowsAffected = db.delete(
+            TABLE_DEVICES,
+            "${COLUMN_ID} = ? AND ${COLUMN_USER_ID} = ?",
+            arrayOf(deviceId.toString(), userId)
+        )
+        db.close()
+        return rowsAffected
+    }
+
 }

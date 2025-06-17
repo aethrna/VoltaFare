@@ -2,70 +2,84 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" android:padding="16dp"
+    android:orientation="vertical"
+    android:padding="16dp"
     android:clickable="true"
     android:focusable="true"
-    android:background="?android:attr/selectableItemBackground"> <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical">
+    android:background="?android:attr/selectableItemBackground">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvIndividualDeviceName"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvIndividualDeviceName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Living Room Lamp" />
+
+            <TextView
+                android:id="@+id/tvIndividualDeviceDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                tools:text="50W, 4 hours/day" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnDeleteDevice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="Living Room Lamp" />
-
-        <TextView
-            android:id="@+id/tvIndividualDeviceDetails"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            tools:text="50W, 4 hours/day" />
-    </LinearLayout>
-
-    <androidx.appcompat.widget.SwitchCompat
+            android:src="@drawable/baseline_delete_24"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:contentDescription="Delete Device"
+            android:layout_marginEnd="8dp" /> <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchDeviceState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-</LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutDeviceExtraDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone" android:paddingTop="12dp"
+        android:visibility="gone"
+        android:paddingTop="12dp"
         android:paddingBottom="4dp"
-        tools:visibility="visible"> <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="4dp">
+        tools:visibility="visible">
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Used Today:"
-            android:textSize="14sp"/>
-        <TextView
-            android:id="@+id/tvDeviceUsageWeek"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            tools:text="18 H"/>
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:paddingVertical="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Used Today:"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/tvDeviceUsageWeek"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="18 H"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

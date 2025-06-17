@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.Intent
 import android.os.Bundle
+import android.view.View // Import View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,66 +16,102 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.google.android.material.floatingactionbutton.FloatingActionButton // Import FAB
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DevDBHelper
-    private lateinit var userDbHelper: DBHelper // NEW: Add a reference to your user DB helper
+    private lateinit var userDbHelper: DBHelper
     private lateinit var greetingText: TextView
     private lateinit var imgProfile: ImageView
     private lateinit var weeklyEnergyChart: LineChart
 
+    // New properties for navigation items
+    private lateinit var navItemAchievements: LinearLayout
+    private lateinit var navItemRecommendations: LinearLayout
+    private lateinit var navItemHome: LinearLayout
+    private lateinit var navItemProfile: LinearLayout
+    private lateinit var fabAddDevice: FloatingActionButton
+
+    private lateinit var indicatorAchievements: View
+    private lateinit var indicatorRecommendations: View
+    private lateinit var indicatorHome: View
+    private lateinit var indicatorProfile: View
+
+    private var currentSelectedIndicator: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         dbHelper = DevDBHelper(this)
-        userDbHelper = DBHelper(this) // NEW: Initialize your user DB helper
+        userDbHelper = DBHelper(this)
 
         greetingText = findViewById(R.id.tvGreeting)
         imgProfile = findViewById(R.id.imgProfile)
 
+        // Initialize new navigation items
+        navItemAchievements = findViewById(R.id.navItemAchievements)
+        navItemRecommendations = findViewById(R.id.navItemRecommendations)
+        navItemHome = findViewById(R.id.navItemHome)
+        navItemProfile = findViewById(R.id.navItemProfile)
+        fabAddDevice = findViewById(R.id.fabAddDevice)
+
+        indicatorAchievements = findViewById(R.id.indicatorAchievements)
+        indicatorRecommendations = findViewById(R.id.indicatorRecommendations)
+        indicatorHome = findViewById(R.id.indicatorHome)
+        indicatorProfile = findViewById(R.id.indicatorProfile)
+
+        // Get user profile data and update greeting
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-        val userEmail = prefs.getString("email", "User") // Get email to fetch profile
+        val userEmail = prefs.getString("email", "User")
         val currentUserId = prefs.getString("currentUserId", null)
 
-        // NEW: Fetch display name from DBHelper
         var displayName = userEmail
         if (currentUserId != null) {
             val userProfile = userDbHelper.getUserProfile(currentUserId)
             displayName = userProfile[DBHelper.COLUMN_DISPLAY_NAME] ?: userEmail
         }
+        greetingText.text = "Hi there, $displayName"
 
-        greetingText.text = "Hi there, $displayName" // Use display name for greeting
+        // Set current date
         val dateTextView = findViewById<TextView>(R.id.dateTextView)
-
         val currentDate = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault()).format(Date())
         dateTextView.text = currentDate
 
+        // Profile image click listener
         imgProfile.setOnClickListener {
             startActivity(Intent(this, DashboardActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnAchievements).setOnClickListener {
+        // Set initial selected state for navigation (e.g., Home)
+        selectNavItem(indicatorHome)
+
+        // Set OnClickListeners for new navigation items
+        navItemAchievements.setOnClickListener {
+            selectNavItem(indicatorAchievements)
             startActivity(Intent(this, AchievementsActivity::class.java))
         }
-
-        findViewById<Button>(R.id.btnRecommendations).setOnClickListener {
+        navItemRecommendations.setOnClickListener {
+            selectNavItem(indicatorRecommendations)
             startActivity(Intent(this, RecommendationsActivity::class.java))
         }
-
-        findViewById<Button>(R.id.btnAddDevice).setOnClickListener {
+        navItemHome.setOnClickListener {
+            selectNavItem(indicatorHome)
+            Toast.makeText(this, "You're already on Home", Toast.LENGTH_SHORT).show()
+        }
+        navItemProfile.setOnClickListener {
+            selectNavItem(indicatorProfile)
+            startActivity(Intent(this, DashboardActivity::class.java))
+        }
+        fabAddDevice.setOnClickListener {
             startActivity(Intent(this, DeviceTypeActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnHome).setOnClickListener {
-            Toast.makeText(this, "You're already on Home", Toast.LENGTH_SHORT).show()
-        }
+        // Setup RecyclerView for devices
+        setupRecyclerView()
 
-        findViewById<Button>(R.id.btnProfile).setOnClickListener {
-            startActivity(Intent(this, DashboardActivity::class.java))
-        }
+        // Setup Weekly Energy Chart
         weeklyEnergyChart = findViewById(R.id.weeklyEnergyChart)
         setupWeeklyEnergyChart()
     }
@@ -94,6 +131,25 @@ class MainActivity : AppCompatActivity() {
             displayName = userProfile[DBHelper.COLUMN_DISPLAY_NAME] ?: userEmail
         }
         greetingText.text = "Hi there, $displayName"
+
+        // Re-select the correct tab if returning from another activity
+        // This is a simple re-selection. For persistent selection across app kills,
+        // you'd save the state in SharedPreferences.
+        // For basic navigation, selecting "Home" on resume is fine.
+        selectNavItem(indicatorHome)
+    }
+
+    // Function to handle selection state of navigation items
+    private fun selectNavItem(selectedIndicator: View) {
+        // Reset all indicators to transparent
+        indicatorAchievements.setBackgroundColor(resources.getColor(android.R.color.transparent, theme))
+        indicatorRecommendations.setBackgroundColor(resources.getColor(android.R.color.transparent, theme))
+        indicatorHome.setBackgroundColor(resources.getColor(android.R.color.transparent, theme))
+        indicatorProfile.setBackgroundColor(resources.getColor(android.R.color.transparent, theme))
+
+        // Set the selected indicator's color
+        selectedIndicator.setBackgroundColor(resources.getColor(R.color.blue_indicator, theme))
+        currentSelectedIndicator = selectedIndicator
     }
 
     private fun setupRecyclerView() {
@@ -121,8 +177,6 @@ class MainActivity : AppCompatActivity() {
         val typeGroups = devices.groupBy { it.name }
 
         for ((type, devicesOfType) in typeGroups) {
-            // Calculate total energy for devices that are ON in this group based on their daily goal
-            // For dashboard cards, this is an estimate of what they would consume if ON for their daily goal.
             val totalEnergy = devicesOfType
                 .filter { it.isOn }
                 .sumOf { (it.wattUsage / 1000) * it.dailyHoursGoal }
@@ -143,26 +197,23 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // --- FETCH REAL DATA FOR THE GRAPH ---
         val weeklyEnergyData = dbHelper.getWeeklyEnergyConsumption(currentUserId)
 
-        // Get the dates and KWh values in the correct order for the X-axis
         val calendar = Calendar.getInstance()
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val dayOfWeekFormat = SimpleDateFormat("EEE", Locale.getDefault()) // For "MON", "TUE" labels
+        val dayOfWeekFormat = SimpleDateFormat("EEE", Locale.getDefault())
 
         val displayDates = mutableListOf<String>()
         val dailyKwhValues = mutableListOf<Float>()
 
-        // Iterate from 6 days ago up to today to ensure correct ordering for the chart
         for (i in 6 downTo 0) {
             calendar.time = Date()
-            calendar.add(Calendar.DAY_OF_YEAR, -i) // Go back i days
-            val dateStr = sdf.format(calendar.time) // "yyyy-MM-dd"
-            val dayLabel = dayOfWeekFormat.format(calendar.time) // "MON", "TUE"
+            calendar.add(Calendar.DAY_OF_YEAR, -i)
+            val dateStr = sdf.format(calendar.time)
+            val dayLabel = dayOfWeekFormat.format(calendar.time)
 
             displayDates.add(dayLabel)
-            dailyKwhValues.add((weeklyEnergyData[dateStr] ?: 0.0).toFloat()) // Get data, default to 0.0 if no entry
+            dailyKwhValues.add((weeklyEnergyData[dateStr] ?: 0.0).toFloat())
         }
 
         val entries = ArrayList<Entry>()

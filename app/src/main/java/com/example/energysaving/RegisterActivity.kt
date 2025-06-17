@@ -27,11 +27,11 @@ class RegisterActivity : AppCompatActivity() {
         val messageText = findViewById<TextView>(R.id.registerMessage)
         val btLogin = findViewById<TextView>(R.id.backToLogin)
 
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+
         btLogin.setOnClickListener {
-            // Consider finishing RegisterActivity if you go back to Login to prevent stack buildup
-            // startActivity(Intent(this, LoginActivity::class.java))
-            // finish()
-            // Or, if StartActivity is your login/register hub:
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)

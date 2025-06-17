@@ -1,6 +1,7 @@
 // File: app/src/main/java/com/example/energysaving/DeviceListDetailActivity.kt
 package com.example.energysaving
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -9,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -17,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.Calendar // Import Calendar
+import java.util.Calendar
 
 class DeviceListDetailActivity : AppCompatActivity() {
 
@@ -27,6 +29,7 @@ class DeviceListDetailActivity : AppCompatActivity() {
     private lateinit var tvDeviceListHeader: TextView
     private var deviceType: String? = null
     private var deviceList: MutableList<Device> = mutableListOf()
+    private lateinit var currentUserId: String // Declare currentUserId here
 
     companion object {
         const val EXTRA_DEVICE_TYPE = "extra_device_type"
@@ -47,6 +50,14 @@ class DeviceListDetailActivity : AppCompatActivity() {
 
         createNotificationChannel()
 
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        currentUserId = prefs.getString("currentUserId", null)
+            ?: run {
+                Toast.makeText(this, "User not identified.", Toast.LENGTH_LONG).show()
+                finish()
+                return
+            }
+
         if (deviceType == null) {
             Toast.makeText(this, "Device type not specified.", Toast.LENGTH_LONG).show()
             finish()
@@ -59,37 +70,52 @@ class DeviceListDetailActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadDevices()
-        // New: Trigger daily aggregation when the activity resumes
         aggregateAndLogDailyEnergy()
     }
 
     private fun setupAdapter() {
-        individualDeviceAdapter = IndividualDeviceAdapter(deviceList) { deviceFromAdapter, newIsOnState ->
-            val deviceInList = deviceList.find { it.id == deviceFromAdapter.id }
-            if (deviceInList != null) {
-                handleDeviceStateChange(deviceInList, newIsOnState)
-            } else {
-                Log.e(TAG, "Device not found in local list for ID: ${deviceFromAdapter.id}")
+        individualDeviceAdapter = IndividualDeviceAdapter(
+            deviceList,
+            onDeviceStateChanged = { deviceFromAdapter, newIsOnState ->
+                val deviceInList = deviceList.find { it.id == deviceFromAdapter.id }
+                if (deviceInList != null) {
+                    handleDeviceStateChange(deviceInList, newIsOnState)
+                } else {
+                    Log.e(TAG, "Device not found in local list for ID: ${deviceFromAdapter.id}")
+                }
+            },
+            onDeviceDelete = { deviceToDelete -> // NEW: Implement the delete callback
+                deleteDevice(deviceToDelete)
             }
-        }
+        )
         recyclerView.adapter = individualDeviceAdapter
     }
 
     private fun loadDevices() {
         deviceType?.let { type ->
-            val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-            val currentUserId = prefs.getString("currentUserId", null)
-            if (currentUserId != null) {
-                val fetchedDevices = dbHelper.getDevicesByTypeForUser(type, currentUserId)
-                deviceList.clear()
-                deviceList.addAll(fetchedDevices)
-                deviceList.forEach { checkAndResetDailyUsage(it, true) }
-                individualDeviceAdapter.updateDevices(deviceList)
-            } else {
-                Toast.makeText(this, "User not identified.", Toast.LENGTH_LONG).show()
-                deviceList.clear()
-                individualDeviceAdapter.updateDevices(deviceList)
+            val fetchedDevices = dbHelper.getDevicesByTypeForUser(type, currentUserId)
+            deviceList.clear()
+            deviceList.addAll(fetchedDevices)
+            deviceList.forEach { checkAndResetDailyUsage(it, true) }
+            individualDeviceAdapter.updateDevices(deviceList)
+
+            // NEW: Check if the list is empty after loading. If so, finish this activity.
+            if (deviceList.isEmpty()) {
+                Toast.makeText(this, "No more $deviceType devices.", Toast.LENGTH_SHORT).show()
+                finish() // Go back to MainActivity, which will refresh its device cards
             }
+        }
+    }
+
+    // NEW: Function to handle device deletion
+    private fun deleteDevice(device: Device) {
+        val deletedRows = dbHelper.deleteDevice(device.id, currentUserId)
+
+        if (deletedRows > 0) {
+            Toast.makeText(this, "${device.description} deleted.", Toast.LENGTH_SHORT).show()
+            loadDevices() // Reload devices to update the RecyclerView and check if the type list is empty
+        } else {
+            Toast.makeText(this, "Failed to delete ${device.description}.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -104,10 +130,7 @@ class DeviceListDetailActivity : AppCompatActivity() {
         if (device.lastResetDate != currentDateStr) {
             Log.d(TAG, "Resetting daily usage for device ID: ${device.id}. Old date: ${device.lastResetDate}, New date: $currentDateStr")
 
-            // If device was ON when day changed, its `timeUsedTodaySeconds` would hold usage up to that point of `lastResetDate`.
-            // When loaded on a new day, we reset its `timeUsedTodaySeconds` for the new day's tracking.
             if (device.isOn && device.lastTurnOnTimestampMillis > 0) {
-                // For simplified reset, the ongoing session's time will start fresh for the new day.
                 device.lastTurnOnTimestampMillis = System.currentTimeMillis()
             }
             device.timeUsedTodaySeconds = 0L
@@ -151,9 +174,9 @@ class DeviceListDetailActivity : AppCompatActivity() {
             individualDeviceAdapter.notifyItemChanged(itemIndex)
         }
 
-        if (!newIsOnState) { // Check for alerts and aggregate only when turning OFF
+        if (!newIsOnState) {
             checkGoalAndAlert(device)
-            aggregateAndLogDailyEnergy() // Log daily energy when a device is turned off
+            aggregateAndLogDailyEnergy()
         }
     }
 
@@ -168,6 +191,7 @@ class DeviceListDetailActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun sendUsageAlertNotification(deviceName: String, usedHours: Double, goalHours: Double, notificationId: Int) {
         val notificationManager = NotificationManagerCompat.from(this)
 
@@ -205,13 +229,12 @@ class DeviceListDetailActivity : AppCompatActivity() {
         }
     }
 
-    // New: Function to aggregate and log daily energy consumption
     private fun aggregateAndLogDailyEnergy() {
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val currentUserId = prefs.getString("currentUserId", null) ?: return
 
         val yesterdayDateStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-            Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)) // Yesterday's date
+            Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000))
         )
         val todayDateStr = localGetCurrentDateString()
 
@@ -221,13 +244,11 @@ class DeviceListDetailActivity : AppCompatActivity() {
         var totalKwhToday = 0.0
 
         for (device in allDevices) {
-            // Aggregate usage for yesterday
             if (device.lastResetDate == yesterdayDateStr && device.timeUsedTodaySeconds > 0) {
                 val hoursUsedYesterday = device.timeUsedTodaySeconds / 3600.0
                 totalKwhYesterday += (device.wattUsage / 1000.0) * hoursUsedYesterday
             }
 
-            // Aggregate usage for today (including current active session)
             if (device.lastResetDate == todayDateStr) {
                 var currentSessionSeconds = 0L
                 if (device.isOn && device.lastTurnOnTimestampMillis > 0) {
@@ -238,11 +259,7 @@ class DeviceListDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Log yesterday's total (if it's not already logged for that date)
-        // Only add or update if totalKwhYesterday is meaningful or if it's not yet recorded for yesterday.
         dbHelper.addOrUpdateDailyEnergy(currentUserId, yesterdayDateStr, totalKwhYesterday)
-
-        // Always update today's total
         dbHelper.addOrUpdateDailyEnergy(currentUserId, todayDateStr, totalKwhToday)
 
         Log.d(TAG, "Aggregated Daily Energy: Today: ${totalKwhToday} kWh, Yesterday: ${totalKwhYesterday} kWh")
