@@ -11,10 +11,8 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// IMPORTANT: Increment your database version (e.g., from 4 to 5)
 class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null, 5) { // Version updated to 5
 
-    // All constants for table and column names MUST be inside the companion object
     companion object {
         const val TABLE_DEVICES = "devices"
         const val COLUMN_ID = "id"
@@ -30,23 +28,22 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         const val COLUMN_LAST_TURN_ON_TIMESTAMP_MILLIS = "last_turn_on_timestamp_millis"
         const val COLUMN_GOAL_EXCEEDED_ALERT_SENT_TODAY = "goal_exceeded_alert_sent_today"
 
-        // New Table and Columns for Daily Energy Logs
+
         const val TABLE_DAILY_ENERGY = "daily_energy_logs"
         const val COLUMN_LOG_ID = "log_id"
-        const val COLUMN_LOG_DATE = "log_date" // YYYY-MM-DD
+        const val COLUMN_LOG_DATE = "log_date"
         const val COLUMN_TOTAL_KWH = "total_kwh"
 
-        // NEW: Table and Columns for Achievements
         const val TABLE_ACHIEVEMENTS = "user_achievements"
-        const val COLUMN_ACHIEVEMENT_ID = "achievement_id" // Unique ID for this specific achievement record (auto)
-        const val COLUMN_ACH_DEF_ID = "ach_def_id" // Reference to a static achievement definition (e.g., "first_device_ach")
+        const val COLUMN_ACHIEVEMENT_ID = "achievement_id"
+        const val COLUMN_ACH_DEF_ID = "ach_def_id"
         const val COLUMN_ACH_TITLE = "title"
         const val COLUMN_ACH_DESCRIPTION = "description"
-        const val COLUMN_ACH_ICON_RES_NAME = "icon_res_name" // Storing drawable name, not ID
-        const val COLUMN_ACH_UNLOCKED = "unlocked" // Boolean (INTEGER 0 or 1)
-        const val COLUMN_ACH_PROGRESS_CURRENT = "progress_current" // For achievements with progress
-        const val COLUMN_ACH_PROGRESS_TARGET = "progress_target" // For achievements with progress
-        const val COLUMN_ACH_UNLOCKED_DATE = "unlocked_date" // YYYY-MM-DD
+        const val COLUMN_ACH_ICON_RES_NAME = "icon_res_name"
+        const val COLUMN_ACH_UNLOCKED = "unlocked"
+        const val COLUMN_ACH_PROGRESS_CURRENT = "progress_current"
+        const val COLUMN_ACH_PROGRESS_TARGET = "progress_target"
+        const val COLUMN_ACH_UNLOCKED_DATE = "unlocked_date"
 
         // NEW: Table and Columns for Bounties
         const val TABLE_BOUNTIES = "user_bounties"
@@ -179,12 +176,12 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
     // Call this upon new user registration to set up default achievements
     fun initializeAchievementsForUser(userId: String) {
         val achievementsToInitialize = listOf(
-            mapOf("def_id" to "lorax_ach", "title" to "The Lorax", "description" to "Maintain top-tier energy saving for 7 days.", "icon" to "ic_lorax_ach", "progress_target" to 7),
-            mapOf("def_id" to "eco_curious_ach", "title" to "Eco Curious", "description" to "Explore all app features.", "icon" to "ic_eco_curious_ach", "progress_target" to 1), // Example of a 1-step achievement
-            mapOf("def_id" to "first_device_ach", "title" to "Plugged In", "description" to "Log your first device.", "icon" to "ic_plugged_in_ach", "progress_target" to 1),
-            mapOf("def_id" to "eco_streak_ach", "title" to "Eco-Streak", "description" to "Complete 3 daily bounties in a row.", "icon" to "ic_eco_streak_ach", "progress_target" to 3),
-            mapOf("def_id" to "watt_a_legend_ach", "title" to "Watt a Legend", "description" to "Achieve a total of 1000 XP.", "icon" to "ic_watt_a_legend_ach", "progress_target" to 1000),
-            mapOf("def_id" to "watt_watcher_ach", "title" to "Watt Watcher", "description" to "Reduce energy usage by 20% in a week.", "icon" to "ic_watt_watcher_ach", "progress_target" to 20)
+            mapOf("def_id" to "lorax_ach", "title" to "The Lorax", "description" to "Maintain top-tier energy saving for 7 days.", "icon" to "thelorax", "progress_target" to 7),
+            mapOf("def_id" to "eco_curious_ach", "title" to "Eco Curious", "description" to "Explore all app features.", "icon" to "ecocurious", "progress_target" to 1),
+            mapOf("def_id" to "first_device_ach", "title" to "Plugged In", "description" to "Log your first device.", "icon" to "pluggedin", "progress_target" to 1),
+            mapOf("def_id" to "eco_streak_ach", "title" to "Eco-Streak", "description" to "Complete 3 daily bounties in a row.", "icon" to "ecostreak", "progress_target" to 3),
+            mapOf("def_id" to "watt_a_legend_ach", "title" to "Watt a Legend", "description" to "Achieve a total of 1000 XP.", "icon" to "wattalegend", "progress_target" to 1000),
+            mapOf("def_id" to "watt_watcher_ach", "title" to "Watt Watcher", "description" to "Reduce energy usage by 20% in a week.", "icon" to "wattwatcher", "progress_target" to 20)
         )
 
         for (ach in achievementsToInitialize) {
@@ -335,9 +332,9 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
     fun initializeBountiesForUser(userId: String) {
         val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val bountiesToInitialize = listOf(
-            mapOf("def_id" to "turn_off_lights_bounty", "title" to "Turn Off All Lights", "description" to "Ensure all lights are off when leaving a room.", "xp_reward" to 5, "icon" to "ic_bounty_lights_off", "progress_target" to 1, "reset_daily" to true),
-            mapOf("def_id" to "save_5_percent_weekly", "title" to "Save 5% more energy this Week", "description" to "Reduce your total weekly energy consumption by 5% compared to last week.", "xp_reward" to 30, "icon" to "ic_bounty_save_energy", "progress_target" to 5, "reset_daily" to false), // Example of a weekly bounty
-            mapOf("def_id" to "hit_energy_goal_2_days", "title" to "Hit your energy goal 2 days in a row", "description" to "Stay below your daily energy goal for two consecutive days.", "xp_reward" to 100, "icon" to "ic_bounty_goal_streak", "progress_target" to 2, "reset_daily" to false)
+            mapOf("def_id" to "turn_off_lights_bounty", "title" to "Turn Off All Lights", "description" to "Ensure all lights are off when leaving a room.", "xp_reward" to 5, "icon" to "targetbounty", "progress_target" to 1, "reset_daily" to true),
+            mapOf("def_id" to "save_5_percent_weekly", "title" to "Save 5% more energy this Week", "description" to "Reduce your total weekly energy consumption by 5% compared to last week.", "xp_reward" to 30, "icon" to "targetbounty", "progress_target" to 5, "reset_daily" to false), // Example of a weekly bounty
+            mapOf("def_id" to "hit_energy_goal_2_days", "title" to "Hit your energy goal 2 days in a row", "description" to "Stay below your daily energy goal for two consecutive days.", "xp_reward" to 100, "icon" to "targetbounty", "progress_target" to 2, "reset_daily" to false)
         )
 
         for (bounty in bountiesToInitialize) {

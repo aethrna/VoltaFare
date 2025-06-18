@@ -1,104 +1,146 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/deviceCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:background="?android:attr/selectableItemBackground">
+    android:foreground="?attr/selectableItemBackground">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/ivDeviceIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/bulboff" />
+
+        <TextView
+            android:id="@+id/tvIndividualDeviceName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginStart="16dp"
+            android:textColor="@color/blue_fab_dark"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunito_regular"
+            app:layout_constraintStart_toEndOf="@+id/ivDeviceIcon"
+            app:layout_constraintTop_toTopOf="@+id/ivDeviceIcon"
+            app:layout_constraintEnd_toStartOf="@+id/btnEditDevice"
+            app:layout_constraintBottom_toTopOf="@+id/tvIndividualDeviceDetails"
+            tools:text="Bedroom Lights" />
 
-            <TextView
-                android:id="@+id/tvIndividualDeviceName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                tools:text="Living Room Lamp" />
-
-            <TextView
-                android:id="@+id/tvIndividualDeviceDetails"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                tools:text="50W, 4 hours/day" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvIndividualDeviceDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/blue_fab_dark"
+            android:fontFamily="@font/nunito_regular"
+            app:layout_constraintStart_toStartOf="@+id/tvIndividualDeviceName"
+            app:layout_constraintTop_toBottomOf="@+id/tvIndividualDeviceName"
+            app:layout_constraintEnd_toEndOf="@+id/tvIndividualDeviceName"
+            tools:text="50W, 4 hours/day" />
 
         <ImageButton
-            android:id="@+id/btnDeleteDevice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_delete_24"
+            android:id="@+id/btnEditDevice"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:contentDescription="Delete Device"
-            android:layout_marginEnd="8dp" /> <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switchDeviceState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnMoreOptions"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="ContentDescription" />
 
-    <LinearLayout
-        android:id="@+id/layoutDeviceExtraDetails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:paddingTop="12dp"
-        android:paddingBottom="4dp"
-        tools:visibility="visible">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Used Today:"
-                android:textSize="14sp"/>
-            <TextView
-                android:id="@+id/tvDeviceUsageWeek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="18 H"/>
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/btnMoreOptions"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/baseline_delete_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="ContentDescription" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/layoutDeviceExtraDetails"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp">
-            <TextView
-                android:layout_width="0dp"
+            android:orientation="vertical"
+            android:paddingTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvIndividualDeviceDetails"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cost:"
-                android:textSize="14sp"/>
-            <TextView
-                android:id="@+id/tvDeviceCost"
-                android:layout_width="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Used this week"
+                    android:textColor="@color/blue_fab_dark"
+                    android:fontFamily="@font/nunito_regular"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/tvDeviceUsageWeek"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/blue_fab_dark"
+                    android:fontFamily="@font/nunito_regular"
+                    android:textStyle="bold"
+                    tools:text="18 H"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="Rp 1.559,88"/>
+                android:orientation="horizontal"
+                android:paddingVertical="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cost"
+                    android:textColor="@color/blue_fab_dark"
+                    android:fontFamily="@font/nunito_regular"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/tvDeviceCost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/blue_fab_dark"
+                    android:fontFamily="@font/nunito_regular"
+                    android:textStyle="bold"
+                    tools:text="Rp 1.559,88"/>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

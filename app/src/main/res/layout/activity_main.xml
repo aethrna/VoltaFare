@@ -44,190 +44,53 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewDevices"
-        android:layout_width="186dp"
-        android:layout_height="235dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavCoordinator"
+        android:layout_width="225dp"
+        android:layout_height="307dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toTopOf="@+id/weeklyEnergyChart"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.282" />
+        app:layout_constraintVertical_bias="0.719" />
 
     <TextView
         android:id="@+id/tvChartTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
-        android:layout_marginBottom="356dp"
+        android:layout_marginBottom="20dp"
         android:fontFamily="@font/nunito_regular"
         android:text="This Week's Energy Consumption"
         android:textColor="#163D6A"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/weeklyEnergyChart"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
+
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/weeklyEnergyChart"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavCoordinator"
+        android:layout_width="380dp"
+        android:layout_height="220dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/chart_view_bg"
+        app:layout_constraintBottom_toTopOf="@id/reusable_nav"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.804" />
+        app:layout_constraintHorizontal_bias="0.483"
+        app:layout_constraintStart_toStartOf="parent" />
 
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/bottomNavCoordinator"
+    <include
+        android:id="@+id/reusable_nav"
+        layout="@layout/navbar_recycle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:layout_editor_absoluteX="205dp"
-        tools:layout_editor_absoluteY="760dp" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddDevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="Add Device"
-        android:src="@drawable/nav_add"
-        app:backgroundTint="@color/blue_fab"
-        app:fabSize="normal"
-        app:tint="@android:color/white"
-        tools:layout_editor_absoluteX="177dp"
-        tools:layout_editor_absoluteY="782dp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:background="@drawable/nav_bar"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:weightSum="4"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="821dp">
-
-        <LinearLayout
-            android:id="@+id/navItemAchievements"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingVertical="8dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Achievements"
-                android:src="@drawable/nav_achiev" />
-
-            <View
-                android:id="@+id/indicatorAchievements"
-                android:layout_width="24dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navItemRecommendations"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingVertical="8dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Recommendations"
-                android:src="@drawable/nav_rec" />
-
-            <View
-                android:id="@+id/indicatorRecommendations"
-                android:layout_width="24dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navItemHome"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingVertical="8dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Home"
-                android:src="@drawable/nav_home" />
-
-            <View
-                android:id="@+id/indicatorHome"
-                android:layout_width="24dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/glow_indc" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navItemProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingVertical="8dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Profile"
-                android:src="@drawable/nav_profile" />
-
-            <View
-                android:id="@+id/indicatorProfile"
-                android:layout_width="24dp"
-                android:layout_height="3dp"
-                android:layout_marginTop="4dp"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
-
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

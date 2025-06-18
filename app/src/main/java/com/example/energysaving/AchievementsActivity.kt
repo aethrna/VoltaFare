@@ -1,24 +1,36 @@
 package com.example.energysaving
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import android.util.Log // For debugging
+import java.util.*
 
-class AchievementsActivity : AppCompatActivity() {
+class AchievementsActivity : BaseActivity() {
+
+    private val TAG = "AchievementLogic"
+
+    override val activeIndicator: Int
+        get() = R.id.navItemAchievements
 
     private lateinit var devDbHelper: DevDBHelper
-    private lateinit var userDbHelper: DBHelper // To update user XP and Level
+    private lateinit var userDbHelper: DBHelper
     private lateinit var achievementAdapter: AchievementListAdapter
     private lateinit var bountyAdapter: BountyAdapter
     private lateinit var currentUserId: String
+    private lateinit var profileImage: ImageView
+    private lateinit var tvDisplayName: TextView
+    private lateinit var tvDisplayTitle: TextView
+    private lateinit var xpProgressBar: ProgressBar
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,22 +47,115 @@ class AchievementsActivity : AppCompatActivity() {
                 return
             }
 
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
-
-        setupAchievementsRecyclerView()
-        setupBountiesRecyclerView()
+        initHeaderViews()
+        loadUserProfileHeader()
+        setupRecyclerViews()
     }
 
     override fun onResume() {
         super.onResume()
+        loadUserProfileHeader()
         loadAchievements()
         loadBounties()
-        checkAndResetDailyBounties() // Ensure daily bounties reset on resume
-        checkAndUnlockAchievements() // Check for new achievements
+        checkAndResetDailyBounties()
+        checkAndUnlockAchievements()
     }
 
+    private fun checkAndUnlockAchievements() {
+        Log.d(TAG, "--- Running Achievement Check ---")
+
+        val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
+        val currentUserProfile = userDbHelper.getUserProfile(currentUserId)
+        val currentUserXp = currentUserProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
+
+        if (allAchievements.isEmpty()){
+            Log.d(TAG, "Achievement list is empty. Cannot check for unlocks.")
+            return
+        }
+
+        for (achievement in allAchievements) {
+            Log.d(TAG, "Checking '${achievement.title}': isUnlocked=${achievement.isUnlocked}, Progress=${achievement.progressCurrent}/${achievement.progressTarget}")
+
+            if (!achievement.isUnlocked) {
+                var newProgress = achievement.progressCurrent
+                var shouldUnlock = false
+
+                when (achievement.defId) {
+                    "first_device_ach" -> {
+                        val deviceCount = devDbHelper.getAllDevicesForUser(currentUserId).size
+                        if (deviceCount >= 1) {
+                            Log.d(TAG, "✅ Condition MET for 'first_device_ach'")
+                            newProgress = 1
+                            shouldUnlock = true
+                        }
+                    }
+                    "eco_curious_ach" -> {
+                        Log.d(TAG, "✅ Condition MET for 'eco_curious_ach'")
+                        newProgress = 1
+                        shouldUnlock = true
+                    }
+                    "watt_a_legend_ach" -> {
+                        if (currentUserXp >= achievement.progressTarget) {
+                            Log.d(TAG, "✅ Condition MET for 'watt_a_legend_ach'")
+                            newProgress = achievement.progressTarget
+                            shouldUnlock = true
+                        } else {
+                            newProgress = currentUserXp
+                        }
+                    }
+                }
+                if (shouldUnlock) {
+                    Log.d(TAG, "➡️ Attempting to UNLOCK '${achievement.title}' in the database...")
+                    val unlockedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    val success = devDbHelper.updateAchievementStatus(currentUserId, achievement.defId, true, newProgress, unlockedDate)
+                    Log.d(TAG, "Database update success for '${achievement.title}': $success")
+                    if(success){
+                        Toast.makeText(this, "Achievement Unlocked: ${achievement.title}!", Toast.LENGTH_LONG).show()
+                    }
+                }
+                else if (newProgress > achievement.progressCurrent) {
+                    Log.d(TAG, "➡️ Attempting to UPDATE PROGRESS for '${achievement.title}' to $newProgress")
+                    val success = devDbHelper.updateAchievementStatus(currentUserId, achievement.defId, false, newProgress, "")
+                    Log.d(TAG, "Database update success for '${achievement.title}': $success")
+                }
+            }
+        }
+        Log.d(TAG, "--- Achievement Check Finished. Reloading list. ---")
+        loadAchievements()
+    }
+
+    private fun initHeaderViews() {
+        profileImage = findViewById(R.id.profileImage)
+        tvDisplayName = findViewById(R.id.tvDisplayName)
+        tvDisplayTitle = findViewById(R.id.tvDisplayTitle)
+        xpProgressBar = findViewById(R.id.xpProgressBar)
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun loadUserProfileHeader() {
+        val userProfile = userDbHelper.getUserProfile(currentUserId)
+        val currentXp = userProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
+        val currentLevel = userProfile[DBHelper.COLUMN_LEVEL]?.toIntOrNull() ?: 1
+
+        tvDisplayName.text = userProfile[DBHelper.COLUMN_DISPLAY_NAME]
+        tvDisplayTitle.text = userProfile[DBHelper.COLUMN_DISPLAY_TITLE]
+
+        val imageUriString = userProfile[DBHelper.COLUMN_PROFILE_IMAGE_URI]
+        if (!imageUriString.isNullOrBlank()) {
+            try {
+                profileImage.setImageURI(Uri.parse(imageUriString))
+            } catch (e: Exception) {
+                profileImage.setImageResource(R.mipmap.ic_launcher_round)
+            }
+        }
+
+        val xpNeededForNextLevel = calculateXpForLevel(currentLevel + 1)
+        val xpForCurrentLevel = calculateXpForLevel(currentLevel)
+        xpProgressBar.max = xpNeededForNextLevel - xpForCurrentLevel
+        xpProgressBar.progress = currentXp - xpForCurrentLevel
+    }
     private fun setupAchievementsRecyclerView() {
         val recyclerViewAchievements = findViewById<RecyclerView>(R.id.recyclerViewAchievementsList)
         recyclerViewAchievements.layoutManager = LinearLayoutManager(this)
@@ -62,13 +167,23 @@ class AchievementsActivity : AppCompatActivity() {
         val recyclerViewBounties = findViewById<RecyclerView>(R.id.recyclerViewBountiesList)
         recyclerViewBounties.layoutManager = LinearLayoutManager(this)
         bountyAdapter = BountyAdapter(emptyList()) { bounty ->
-            // Handle bounty click (e.g., mark as complete manually if applicable, or show details)
-            // For bounties that require user action in this activity, this is where you'd trigger it.
-            // Most bounties will be completed through other activities (e.g., turning off devices).
-            Toast.makeText(this, "Bounty: ${bounty.title} clicked!", Toast.LENGTH_SHORT).show()
-            // Example: For "Turn off lights", if user manually clicks, it marks it complete
-            // This is a placeholder for actual game logic.
             if (bounty.defId == "turn_off_lights_bounty" && !bounty.isCompleted) {
+                completeBounty(bounty.defId)
+            }
+        }
+        recyclerViewBounties.adapter = bountyAdapter
+    }
+
+    private fun setupRecyclerViews() {
+        val recyclerViewAchievements = findViewById<RecyclerView>(R.id.recyclerViewAchievementsList)
+        recyclerViewAchievements.layoutManager = LinearLayoutManager(this)
+        achievementAdapter = AchievementListAdapter(emptyList())
+        recyclerViewAchievements.adapter = achievementAdapter
+
+        val recyclerViewBounties = findViewById<RecyclerView>(R.id.recyclerViewBountiesList)
+        recyclerViewBounties.layoutManager = LinearLayoutManager(this)
+        bountyAdapter = BountyAdapter(emptyList()) { bounty ->
+            if (!bounty.isCompleted) {
                 completeBounty(bounty.defId)
             }
         }
@@ -100,78 +215,13 @@ class AchievementsActivity : AppCompatActivity() {
         val allBounties = devDbHelper.getAllBountiesForUser(currentUserId)
 
         for (bounty in allBounties) {
-            // Check if bounty is daily and if its last reset date is not today
-            // Note: The bounty initialization data (reset_daily: true/false) is not directly stored in the DB,
-            // so for a robust solution, you'd need a static definition of bounties in code
-            // or in a separate "bounty_definitions" table.
-            // For now, we'll assume bounties initialized with a lastResetDate mean they are resettable.
             if (bounty.lastResetDate.isNotEmpty() && bounty.lastResetDate != todayDate) {
                 devDbHelper.updateBountyStatus(currentUserId, bounty.defId, false, 0, todayDate)
                 Log.d("AchievementsActivity", "Resetting daily bounty: ${bounty.title}")
             }
         }
-        loadBounties() // Reload bounties after potential resets
+        loadBounties()
     }
-
-    private fun checkAndUnlockAchievements() {
-        val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
-        val currentUserProfile = userDbHelper.getUserProfile(currentUserId)
-        val currentUserXp = currentUserProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
-
-        for (achievement in allAchievements) {
-            if (!achievement.isUnlocked) {
-                var newProgress = achievement.progressCurrent // Default to current progress
-                var shouldUnlock = false
-
-                when (achievement.defId) {
-                    "first_device_ach" -> {
-                        val deviceCount = devDbHelper.getAllDevicesForUser(currentUserId).size
-                        if (deviceCount >= 1 && achievement.progressCurrent < 1) { // Check progressCurrent to avoid re-triggering
-                            newProgress = 1
-                            shouldUnlock = true
-                        }
-                    }
-                    "eco_curious_ach" -> {
-                        // This achievement would require tracking user navigation or feature usage
-                        // For demonstration, let's say simply visiting this activity progresses it
-                        // You'd need a more robust way to track this
-                        if (achievement.progressCurrent == 0) { // Only update if not yet progressed
-                            newProgress = 1
-                            shouldUnlock = true
-                        }
-                    }
-                    "watt_a_legend_ach" -> {
-                        // Progress based on total XP
-                        if (currentUserXp >= achievement.progressTarget) {
-                            newProgress = achievement.progressTarget
-                            shouldUnlock = true
-                        } else {
-                            newProgress = currentUserXp // Update progress as XP increases
-                        }
-                    }
-                    // Add more achievement logic here based on your defined def_ids
-                    // e.g., "lorax_ach" might depend on daily energy consumption data
-                    // "eco_streak_ach" might depend on bounty completion streaks
-                    // "watt_watcher_ach" might depend on weekly energy reduction calculations
-                }
-
-                if (shouldUnlock || (newProgress > achievement.progressCurrent && newProgress <= achievement.progressTarget)) {
-                    val unlockedDate = if (shouldUnlock) SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) else ""
-                    devDbHelper.updateAchievementStatus(currentUserId, achievement.defId, shouldUnlock, newProgress, unlockedDate)
-                    if (shouldUnlock) {
-                        Toast.makeText(this, "Achievement Unlocked: ${achievement.title}!", Toast.LENGTH_LONG).show()
-                        // You might also award XP for achievements directly, or just bounties
-                    }
-                }
-            }
-        }
-        loadAchievements() // Reload achievements after checking
-    }
-
-
-    // This method would be called when a bounty is completed, typically from
-    // other activities (e.g., DeviceListDetailActivity when a device is turned off for "Turn Off All Lights")
-    // For manual completion in AchievementsActivity, it could be triggered by clicking.
     fun completeBounty(bountyDefId: String, progressIncrement: Int = 1) {
         val bounty = devDbHelper.getAllBountiesForUser(currentUserId).find { it.defId == bountyDefId }
 
@@ -180,7 +230,7 @@ class AchievementsActivity : AppCompatActivity() {
             var isCompleted = false
 
             if (newProgress >= bounty.progressTarget) {
-                newProgress = bounty.progressTarget // Cap progress at target
+                newProgress = bounty.progressTarget
                 isCompleted = true
             }
 
@@ -193,20 +243,17 @@ class AchievementsActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "${bounty.title} Progress: $newProgress/${bounty.progressTarget}", Toast.LENGTH_SHORT).show()
                 }
-                loadBounties() // Refresh bounties list
-                checkAndUnlockAchievements() // Check if any achievements are unlocked
+                loadBounties()
+                checkAndUnlockAchievements()
             }
         }
     }
-
     private fun awardXpToUser(xpAmount: Int) {
         val currentUserProfile = userDbHelper.getUserProfile(currentUserId)
         var currentXp = currentUserProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
         var currentLevel = currentUserProfile[DBHelper.COLUMN_LEVEL]?.toIntOrNull() ?: 1
 
         currentXp += xpAmount
-
-        // Level up logic (same as in DashboardActivity)
         while (currentXp >= calculateXpForLevel(currentLevel + 1) && calculateXpForLevel(currentLevel + 1) != 0) {
             currentLevel++
             Toast.makeText(this, "Congratulations! You reached Level $currentLevel!", Toast.LENGTH_LONG).show()
@@ -214,18 +261,15 @@ class AchievementsActivity : AppCompatActivity() {
 
         userDbHelper.updateUserXPAndLevel(currentUserId, currentXp, currentLevel)
     }
-
-    // This function needs to be consistent with the one in DashboardActivity
     private fun calculateXpForLevel(level: Int): Int {
         return when (level) {
-            1 -> 0 // Starts at 0 XP
-            2 -> 5 // Only 5 XP needed for Level 2 for testing
-            3 -> 15 // Example: 15 XP for Level 3
+            1 -> 0
+            2 -> 5
+            3 -> 15
             4 -> 30
             5 -> 50
             else -> {
-                // Your exponential or linear formula for higher levels
-                50 + (level - 5) * 20 // Example: 20 XP per level after 5
+                50 + (level - 5) * 20
             }
         }
     }

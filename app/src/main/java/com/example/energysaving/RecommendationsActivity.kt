@@ -1,31 +1,48 @@
 package com.example.energysaving
 
 import android.os.Bundle
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class RecommendationsActivity : AppCompatActivity() {
+class RecommendationsActivity : BaseActivity() {
 
+    // 2. Add this override to tell BaseActivity which icon to highlight
+    override val activeIndicator: Int
+        get() = R.id.navItemRecommendations
+
+    // --- Views specific to this activity ---
     private lateinit var devDbHelper: DevDBHelper
-    private lateinit var tvRecommendations: TextView
     private lateinit var currentUserId: String
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: RecommendationAdapter
+    private lateinit var tvHeader: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recommendations) // You'll need to create this layout
+        // This automatically calls the navigation setup from BaseActivity
+        setContentView(R.layout.activity_recommendations)
 
+        // Initialize only the views for THIS screen
         devDbHelper = DevDBHelper(this)
-        tvRecommendations = findViewById(R.id.tvRecommendations) // Assuming you add this TextView to your layout
+        recyclerView = findViewById(R.id.recyclerViewRecommendations)
+        tvHeader = findViewById(R.id.tvRecommendationsHeader)
+
+        // You can now REMOVE the old back button logic, as the nav bar handles it
+        // findViewById<ImageButton>(R.id.btnBack).setOnClickListener { ... }
 
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         currentUserId = prefs.getString("currentUserId", null)
             ?: run {
-                tvRecommendations.text = "Error: User not logged in."
+                tvHeader.text = "Error: User not logged in."
                 return
             }
 
@@ -40,24 +57,30 @@ class RecommendationsActivity : AppCompatActivity() {
             val prompt = buildGeminiPrompt(allDevices, weeklyEnergyConsumption)
 
             try {
-                // Initialize the GenerativeModel (replace with your actual API key)
+                // Initialize the GenerativeModel
                 val generativeModel = GenerativeModel(
-                    modelName = "gemini-1.5-flash", // Or "gemini-1.5-flash", "gemini-1.5-pro"
-                    apiKey = "AIzaSyDyAF8bPkCG3W2Ms6Ugq0u0-5lzuEyYuE8" // NEVER HARDCODE IN PRODUCTION APPS! Use a secure method.
+                    modelName = "gemini-1.5-flash",
+                    apiKey = "AIzaSyAePaFw7IiIB-33x6HCNTcN4VGavOA1_2s" // Make sure to use your actual API Key
                 )
 
                 val response = generativeModel.generateContent(prompt)
 
                 withContext(Dispatchers.Main) {
-                    if (response.text != null) {
-                        tvRecommendations.text = response.text
+                    val recommendationsText = response.text
+                    if (recommendationsText != null) {
+                        // Parse the single string into a list of strings
+                        val recommendationList = recommendationsText.lines().filter { it.isNotBlank() }
+
+                        // Set up the RecyclerView with the new adapter
+                        adapter = RecommendationAdapter(recommendationList)
+                        recyclerView.adapter = adapter
                     } else {
-                        tvRecommendations.text = "Failed to get recommendations."
+                        // Handle no recommendations
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    tvRecommendations.text = "Error: ${e.message}"
+                    // Handle API error
                 }
             }
         }
@@ -86,9 +109,8 @@ class RecommendationsActivity : AppCompatActivity() {
         return "Given the following information about my household devices and energy consumption, " +
                 "please provide practical and actionable tips to reduce my energy usage and save money. " +
                 "Focus on specific device usage patterns and general good practices. " +
-                "Please be concise and provide actionable steps:\n\n" +
+                "Provide the output as a simple list separated by newlines, with each tip starting with a number and a period. For example: '1. Unplug chargers.'\n\n" +
                 deviceData.toString() +
-                consumptionData.toString() +
-                "\nEnergy saving tips:"
+                consumptionData.toString()
     }
 }

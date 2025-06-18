@@ -1,68 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/achievementCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:padding="12dp"
-    android:layout_marginBottom="8dp"
-    android:background="@android:color/white"
-    android:elevation="2dp">
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <ImageView
-        android:id="@+id/achievementIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="12dp"
-        tools:src="@tools:sample/avatars"
-        tools:ignore="ContentDescription" />
-
-    <LinearLayout
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/achievementIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/achievementTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/achievementStatusIcon"
+            app:layout_constraintStart_toEndOf="@+id/achievementIcon"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="The Lorax" />
 
-        <TextView
-            android:id="@+id/achievementDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            tools:text="Maintain top-tier energy saving for 7 days." />
+        <ImageView
+            android:id="@+id/achievementStatusIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/baseline_check_box_24" />
 
-        <ProgressBar
-            android:id="@+id/achievementProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:progressDrawable="@drawable/custom_progressbar"
-            tools:progress="50"
-            tools:max="100" />
-
-        <TextView
-            android:id="@+id/achievementProgressText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            tools:text="Progress: 3/7 days" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/achievementStatusIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="12dp"
-        tools:src="@drawable/baseline_check_box_24"
-        tools:ignore="ContentDescription" />
-
-</LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
