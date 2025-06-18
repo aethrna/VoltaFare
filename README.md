@@ -112,7 +112,7 @@ The application uses SQLite to store user and device data. Key tables include:
 
 ## Contributing
 
-(In progress)
+aethrna
 
 ## License
 
