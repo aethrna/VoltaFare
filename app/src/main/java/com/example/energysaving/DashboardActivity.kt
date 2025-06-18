@@ -2,7 +2,6 @@ package com.example.energysaving
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -10,7 +9,6 @@ import android.widget.*
 import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.InputStream
 
 class DashboardActivity : BaseActivity() {
 
