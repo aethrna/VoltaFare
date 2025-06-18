@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Energysaving"
+rootProject.name = "VoltaFare"
 include(":app")

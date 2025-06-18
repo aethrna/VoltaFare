@@ -9,21 +9,17 @@ import android.annotation.SuppressLint // Import annotation
 class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) { // Version updated to 3
 
     companion object {
-        // It's good practice to define table and column names as constants
         const val TABLE_USERS = "users"
         const val COLUMN_EMAIL = "email"
         const val COLUMN_PASSWORD = "password"
-        // New columns for Dashboard
         const val COLUMN_DISPLAY_NAME = "display_name"
         const val COLUMN_DISPLAY_TITLE = "display_title"
         const val COLUMN_PROFILE_IMAGE_URI = "profile_image_uri"
-        // NEW COLUMNS for XP Bar:
         const val COLUMN_XP = "xp"
         const val COLUMN_LEVEL = "level"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        // Use constants for table and column names
         db.execSQL("CREATE TABLE ${TABLE_USERS}(" +
                 "${COLUMN_EMAIL} TEXT PRIMARY KEY, " +
                 "${COLUMN_PASSWORD} TEXT, " +
@@ -35,9 +31,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Handle database schema upgrades
         if (oldVersion < 2) {
-            // Add columns from previous update (Display Name, Display Title, Profile Image URI)
             db.execSQL("ALTER TABLE ${TABLE_USERS} ADD COLUMN ${COLUMN_DISPLAY_NAME} TEXT DEFAULT ''")
             db.execSQL("ALTER TABLE ${TABLE_USERS} ADD COLUMN ${COLUMN_DISPLAY_TITLE} TEXT DEFAULT ''")
             db.execSQL("ALTER TABLE ${TABLE_USERS} ADD COLUMN ${COLUMN_PROFILE_IMAGE_URI} TEXT DEFAULT ''")
@@ -46,34 +40,29 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
             db.execSQL("ALTER TABLE ${TABLE_USERS} ADD COLUMN ${COLUMN_XP} INTEGER DEFAULT 0")
             db.execSQL("ALTER TABLE ${TABLE_USERS} ADD COLUMN ${COLUMN_LEVEL} INTEGER DEFAULT 1")
         }
-        // IMPORTANT: If you are upgrading from a very old version (e.g., 1 directly to 3),
-        // and you need to preserve data, you should have ALTER TABLE statements for all intermediate versions.
-        // For development, dropping and recreating is often done for simplicity:
-        // db.execSQL("DROP TABLE IF EXISTS ${TABLE_USERS}")
-        // onCreate(db)
     }
 
     fun registerUser(email: String, password: String, displayName: String): Boolean {
-        val db = this.writableDatabase // Open database
+        val db = this.writableDatabase
         var result = -1L
         try {
             val values = ContentValues().apply {
                 put(COLUMN_EMAIL, email)
                 put(COLUMN_PASSWORD, password)
-                put(COLUMN_DISPLAY_NAME, displayName) // Set initial display name
-                put(COLUMN_DISPLAY_TITLE, "New Member") // Set initial display title
-                put(COLUMN_XP, 0)      // Initialize XP
-                put(COLUMN_LEVEL, 1)   // Initialize Level
+                put(COLUMN_DISPLAY_NAME, displayName)
+                put(COLUMN_DISPLAY_TITLE, "New Member")
+                put(COLUMN_XP, 0)
+                put(COLUMN_LEVEL, 1)
             }
             result = db.insert(TABLE_USERS, null, values)
         } finally {
-            db.close() // Ensure database is closed even if an error occurs
+            db.close()
         }
         return result != -1L
     }
 
     fun checkUser(email: String, password: String): Boolean {
-        val db = this.readableDatabase // Open database
+        val db = this.readableDatabase
         var exists = false
         var cursor = db.rawQuery(
             "SELECT * FROM ${TABLE_USERS} WHERE ${COLUMN_EMAIL}=? AND ${COLUMN_PASSWORD}=?",
@@ -82,14 +71,14 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
         try {
             exists = cursor.count > 0
         } finally {
-            cursor.close() // Close cursor
-            db.close()     // Ensure database is closed
+            cursor.close()
+            db.close()
         }
         return exists
     }
 
     fun checkEmailExists(email: String): Boolean {
-        val db = this.readableDatabase // Open database
+        val db = this.readableDatabase
         var exists = false
         val cursor = db.rawQuery(
             "SELECT * FROM ${TABLE_USERS} WHERE ${COLUMN_EMAIL}=?",
@@ -98,15 +87,15 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
         try {
             exists = cursor.count > 0
         } finally {
-            cursor.close() // Close cursor
-            db.close()     // Ensure database is closed
+            cursor.close()
+            db.close()
         }
         return exists
     }
 
     @SuppressLint("Range")
     fun getUserId(emailInput: String): String? {
-        val db = this.readableDatabase // Open database
+        val db = this.readableDatabase
         var userId: String? = null
         val projection = arrayOf(COLUMN_EMAIL)
         val selection = "${COLUMN_EMAIL} = ?"
@@ -124,8 +113,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
                 userId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
             }
         } finally {
-            cursor.close() // Close cursor
-            db.close()     // Ensure database is closed
+            cursor.close()
+            db.close()
         }
         return userId
     }
@@ -144,8 +133,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "UserDB", null, 3) 
                 profile[COLUMN_DISPLAY_NAME] = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISPLAY_NAME))
                 profile[COLUMN_DISPLAY_TITLE] = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISPLAY_TITLE))
                 profile[COLUMN_PROFILE_IMAGE_URI] = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROFILE_IMAGE_URI))
-                profile[COLUMN_XP] = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_XP)).toString() // Get as Int, convert to String
-                profile[COLUMN_LEVEL] = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)).toString() // Get as Int, convert to String
+                profile[COLUMN_XP] = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_XP)).toString()
+                profile[COLUMN_LEVEL] = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)).toString()
             }
         } finally {
             cursor.close()

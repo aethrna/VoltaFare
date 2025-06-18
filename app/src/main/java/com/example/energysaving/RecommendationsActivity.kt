@@ -15,11 +15,9 @@ import kotlinx.coroutines.withContext
 
 class RecommendationsActivity : BaseActivity() {
 
-    // 2. Add this override to tell BaseActivity which icon to highlight
     override val activeIndicator: Int
         get() = R.id.navItemRecommendations
 
-    // --- Views specific to this activity ---
     private lateinit var devDbHelper: DevDBHelper
     private lateinit var currentUserId: String
     private lateinit var recyclerView: RecyclerView
@@ -28,17 +26,11 @@ class RecommendationsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // This automatically calls the navigation setup from BaseActivity
         setContentView(R.layout.activity_recommendations)
 
-        // Initialize only the views for THIS screen
         devDbHelper = DevDBHelper(this)
         recyclerView = findViewById(R.id.recyclerViewRecommendations)
         tvHeader = findViewById(R.id.tvRecommendationsHeader)
-
-        // You can now REMOVE the old back button logic, as the nav bar handles it
-        // findViewById<ImageButton>(R.id.btnBack).setOnClickListener { ... }
-
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         currentUserId = prefs.getString("currentUserId", null)
             ?: run {
@@ -57,10 +49,9 @@ class RecommendationsActivity : BaseActivity() {
             val prompt = buildGeminiPrompt(allDevices, weeklyEnergyConsumption)
 
             try {
-                // Initialize the GenerativeModel
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-1.5-flash",
-                    apiKey = "AIzaSyAePaFw7IiIB-33x6HCNTcN4VGavOA1_2s" // Make sure to use your actual API Key
+                    apiKey = "GEMINI_API_KEY"
                 )
 
                 val response = generativeModel.generateContent(prompt)
@@ -68,19 +59,13 @@ class RecommendationsActivity : BaseActivity() {
                 withContext(Dispatchers.Main) {
                     val recommendationsText = response.text
                     if (recommendationsText != null) {
-                        // Parse the single string into a list of strings
                         val recommendationList = recommendationsText.lines().filter { it.isNotBlank() }
-
-                        // Set up the RecyclerView with the new adapter
                         adapter = RecommendationAdapter(recommendationList)
                         recyclerView.adapter = adapter
-                    } else {
-                        // Handle no recommendations
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    // Handle API error
                 }
             }
         }

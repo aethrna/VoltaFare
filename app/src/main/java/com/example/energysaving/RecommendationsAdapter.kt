@@ -20,7 +20,6 @@ class RecommendationAdapter(private var recommendations: List<String>) :
     }
 
     override fun onBindViewHolder(holder: RecommendationViewHolder, position: Int) {
-        // Clean up the string before displaying it (e.g., remove leading numbers or hyphens)
         val cleanedText = recommendations[position].replaceFirst(Regex("^\\d+\\.\\s*|^-\\s*"), "")
         holder.recommendationTextView.text = cleanedText
     }

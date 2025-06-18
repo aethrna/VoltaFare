@@ -44,8 +44,7 @@ class LoginActivity : AppCompatActivity() {
                     val wasRememberMeChecked = rememberMeCheckbox.isChecked
                     val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
 
-                    // *** Get User ID ***
-                    val currentUserId = dbHelper.getUserId(email) // Call the new method
+                    val currentUserId = dbHelper.getUserId(email)
 
                     with(sharedPref.edit()) {
                         putBoolean("userWantsToStayLoggedIn", wasRememberMeChecked)
@@ -54,13 +53,9 @@ class LoginActivity : AppCompatActivity() {
                         } else {
                             putBoolean("isLoggedIn", false)
                         }
-                        putString("email", email) // You already have this
+                        putString("email", email)
                         if (currentUserIdString != null) {
                             putString("currentUserId", currentUserIdString)
-                        } else {
-                            // Handle case where userId couldn't be found - though login succeeded, this would be odd.
-                            // Log an error, perhaps don't proceed.
-                            // For now, we'll assume it's always found after successful login.
                         }
                         apply()
                     }

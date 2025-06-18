@@ -11,7 +11,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null, 5) { // Version updated to 5
+class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null, 5) {
 
     companion object {
         const val TABLE_DEVICES = "devices"
@@ -44,25 +44,22 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         const val COLUMN_ACH_PROGRESS_CURRENT = "progress_current"
         const val COLUMN_ACH_PROGRESS_TARGET = "progress_target"
         const val COLUMN_ACH_UNLOCKED_DATE = "unlocked_date"
-
-        // NEW: Table and Columns for Bounties
         const val TABLE_BOUNTIES = "user_bounties"
-        const val COLUMN_BOUNTY_ID = "bounty_id" // Unique ID for this specific bounty record (auto)
-        const val COLUMN_BOUNTY_DEF_ID = "bounty_def_id" // Reference to a static bounty definition (e.g., "turn_off_lights")
+        const val COLUMN_BOUNTY_ID = "bounty_id"
+        const val COLUMN_BOUNTY_DEF_ID = "bounty_def_id"
         const val COLUMN_BOUNTY_TITLE = "title"
         const val COLUMN_BOUNTY_DESCRIPTION = "description"
         const val COLUMN_BOUNTY_XP_REWARD = "xp_reward"
         const val COLUMN_BOUNTY_ICON_RES_NAME = "icon_res_name"
-        const val COLUMN_BOUNTY_COMPLETED = "completed" // Boolean (INTEGER 0 or 1)
+        const val COLUMN_BOUNTY_COMPLETED = "completed"
         const val COLUMN_BOUNTY_PROGRESS_CURRENT = "progress_current"
         const val COLUMN_BOUNTY_PROGRESS_TARGET = "progress_target"
-        const val COLUMN_BOUNTY_LAST_RESET_DATE = "last_reset_date" // For daily/weekly bounties
+        const val COLUMN_BOUNTY_LAST_RESET_DATE = "last_reset_date"
     }
 
-    private val applicationContext: Context = context // Store context to get resources by name
+    private val applicationContext: Context = context
 
     override fun onCreate(db: SQLiteDatabase) {
-        // Create the devices table
         db.execSQL(
             "CREATE TABLE ${TABLE_DEVICES}(" +
                     "${COLUMN_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -78,14 +75,13 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
                     "${COLUMN_GOAL_EXCEEDED_ALERT_SENT_TODAY} INTEGER DEFAULT 0)"
         )
 
-        // Create the daily energy logs table
         db.execSQL(
             "CREATE TABLE ${TABLE_DAILY_ENERGY}(" +
                     "${COLUMN_LOG_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "${COLUMN_LOG_DATE} TEXT NOT NULL, " + // Date is unique per user
+                    "${COLUMN_LOG_DATE} TEXT NOT NULL, " +
                     "${COLUMN_TOTAL_KWH} REAL DEFAULT 0.0, " +
                     "${COLUMN_USER_ID} TEXT NOT NULL, " +
-                    "UNIQUE(${COLUMN_LOG_DATE}, ${COLUMN_USER_ID}))" // Ensure only one entry per user per day
+                    "UNIQUE(${COLUMN_LOG_DATE}, ${COLUMN_USER_ID}))"
         )
 
         // NEW: Create Achievements table
@@ -93,7 +89,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
             "CREATE TABLE ${TABLE_ACHIEVEMENTS}(" +
                     "${COLUMN_ACHIEVEMENT_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "${COLUMN_USER_ID} TEXT NOT NULL, " +
-                    "${COLUMN_ACH_DEF_ID} TEXT NOT NULL, " + // e.g., "first_login_ach"
+                    "${COLUMN_ACH_DEF_ID} TEXT NOT NULL, " +
                     "${COLUMN_ACH_TITLE} TEXT, " +
                     "${COLUMN_ACH_DESCRIPTION} TEXT, " +
                     "${COLUMN_ACH_ICON_RES_NAME} TEXT, " +
@@ -101,15 +97,14 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
                     "${COLUMN_ACH_PROGRESS_CURRENT} INTEGER DEFAULT 0, " +
                     "${COLUMN_ACH_PROGRESS_TARGET} INTEGER DEFAULT 0, " +
                     "${COLUMN_ACH_UNLOCKED_DATE} TEXT DEFAULT '', " +
-                    "UNIQUE(${COLUMN_USER_ID}, ${COLUMN_ACH_DEF_ID}))" // One achievement per user per definition
+                    "UNIQUE(${COLUMN_USER_ID}, ${COLUMN_ACH_DEF_ID}))"
         )
 
-        // NEW: Create Bounties table
         db.execSQL(
             "CREATE TABLE ${TABLE_BOUNTIES}(" +
                     "${COLUMN_BOUNTY_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "${COLUMN_USER_ID} TEXT NOT NULL, " +
-                    "${COLUMN_BOUNTY_DEF_ID} TEXT NOT NULL, " + // e.g., "daily_lights_off"
+                    "${COLUMN_BOUNTY_DEF_ID} TEXT NOT NULL, " +
                     "${COLUMN_BOUNTY_TITLE} TEXT, " +
                     "${COLUMN_BOUNTY_DESCRIPTION} TEXT, " +
                     "${COLUMN_BOUNTY_XP_REWARD} INTEGER DEFAULT 0, " +
@@ -124,26 +119,17 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 2) {
-            // (Assuming you previously had these ALTER statements for version 2)
-            // No action needed here if your initial DevDBHelper already created these.
         }
         if (oldVersion < 3) {
-            // (Assuming you previously had these ALTER statements for version 3)
-            // No action needed here if your initial DevDBHelper already created these.
         }
         if (oldVersion < 4) {
-            // (Assuming you previously had these ALTER statements for version 4)
-            // No action needed here if your initial DevDBHelper already created these.
         }
-        if (oldVersion < 5) { // Upgrade to version 5, adding achievements and bounties tables
+        if (oldVersion < 5) {
             db.execSQL("DROP TABLE IF EXISTS ${TABLE_ACHIEVEMENTS}")
             db.execSQL("DROP TABLE IF EXISTS ${TABLE_BOUNTIES}")
-            // Re-create them here to ensure new schema is applied
-            onCreate(db) // This will recreate all tables if they don't exist
+            onCreate(db)
         }
     }
-
-    // --- NEW: Achievement-related methods ---
 
     fun insertAchievement(
         userId: String,
@@ -173,7 +159,6 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         return result != -1L
     }
 
-    // Call this upon new user registration to set up default achievements
     fun initializeAchievementsForUser(userId: String) {
         val achievementsToInitialize = listOf(
             mapOf("def_id" to "lorax_ach", "title" to "The Lorax", "description" to "Maintain top-tier energy saving for 7 days.", "icon" to "thelorax", "progress_target" to 7),
@@ -214,7 +199,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
             do {
                 val iconResId = applicationContext.resources.getIdentifier(
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACH_ICON_RES_NAME)),
-                    "drawable", // or "mipmap" depending on where you store icons
+                    "drawable",
                     applicationContext.packageName
                 )
                 val achievement = Achievement(
@@ -233,7 +218,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         }
         cursor.close()
         db.close()
-        return achievementList.sortedBy { !it.isUnlocked } // Show unlocked first
+        return achievementList.sortedBy { !it.isUnlocked }
     }
 
     fun updateAchievementStatus(
@@ -241,7 +226,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         achDefId: String,
         unlocked: Boolean,
         progressCurrent: Int,
-        unlockedDate: String? = null // Optional: set if unlocked
+        unlockedDate: String? = null
     ): Boolean {
         val db = this.writableDatabase
         val values = ContentValues().apply {
@@ -295,9 +280,6 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         return achievement
     }
 
-
-    // --- NEW: Bounty-related methods ---
-
     fun insertBounty(
         userId: String,
         bountyDefId: String,
@@ -307,7 +289,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         iconResName: String,
         completed: Boolean = false,
         progressCurrent: Int = 0,
-        progressTarget: Int = 1, // Default target is 1 for simple completion
+        progressTarget: Int = 1,
         lastResetDate: String = ""
     ): Boolean {
         val db = this.writableDatabase
@@ -328,7 +310,6 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         return result != -1L
     }
 
-    // Call this upon new user registration or daily refresh to set up default bounties
     fun initializeBountiesForUser(userId: String) {
         val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val bountiesToInitialize = listOf(
@@ -389,7 +370,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         }
         cursor.close()
         db.close()
-        return bountyList.sortedBy { it.isCompleted } // Show incomplete first
+        return bountyList.sortedBy { it.isCompleted }
     }
 
     fun updateBountyStatus(
@@ -417,12 +398,10 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
         return rowsAffected > 0
     }
 
-    // Existing methods from DevDBHelper below (getAllDevicesForUser, getDevicesByTypeForUser, etc.)
-    // Make sure these are still present and unchanged from your latest DevDBHelper version.
 
     fun insertDevice(
-        name: String, // This is the type/category
-        description: String, // This is the specific user-inputted name
+        name: String,
+        description: String,
         wattUsage: Double,
         dailyHoursGoal: Double,
         isOn: Boolean = true,
@@ -595,7 +574,7 @@ class DevDBHelper(context: Context) : SQLiteOpenHelper(context, "DeviceDB", null
             val date = Date(System.currentTimeMillis() - i * 24 * 60 * 60 * 1000)
             val dateStr = sdf.format(date)
             datesList.add(dateStr)
-            dailyData[dateStr] = 0.0 // Initialize with 0.0
+            dailyData[dateStr] = 0.0
         }
 
         val query = "SELECT ${COLUMN_LOG_DATE}, ${COLUMN_TOTAL_KWH} FROM ${TABLE_DAILY_ENERGY} " +

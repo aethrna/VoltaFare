@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
@@ -26,7 +25,6 @@ class DeviceListDetailActivity : BaseActivity() {
     override val activeIndicator: Int
         get() = 0
 
-    // Class Properties
     private lateinit var dbHelper: DevDBHelper
     private lateinit var userDbHelper: DBHelper
     private lateinit var individualDeviceAdapter: IndividualDeviceAdapter
@@ -141,7 +139,6 @@ class DeviceListDetailActivity : BaseActivity() {
             val fetchedDevices = dbHelper.getDevicesByTypeForUser(type, currentUserId)
             deviceList.clear()
             deviceList.addAll(fetchedDevices)
-            // It's important to reset usage *before* updating the adapter
             deviceList.forEach { checkAndResetDailyUsage(it) }
             individualDeviceAdapter.updateDevices(deviceList)
 
@@ -162,7 +159,6 @@ class DeviceListDetailActivity : BaseActivity() {
         }
     }
 
-    // --- THIS IS THE CORRECTED FUNCTION ---
     private fun checkAndResetDailyUsage(device: Device): Boolean {
         val currentDateStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         var resetOccurred = false
@@ -175,10 +171,8 @@ class DeviceListDetailActivity : BaseActivity() {
             device.goalExceededAlertSentToday = false
             device.lastResetDate = currentDateStr
             resetOccurred = true
-            // Always persist the changes if a reset happened
             dbHelper.updateDeviceTrackingData(device)
         }
-        // This return statement was missing
         return resetOccurred
     }
 
@@ -207,7 +201,6 @@ class DeviceListDetailActivity : BaseActivity() {
         try {
             notificationManager.notify(notificationId, notification)
         } catch (e: SecurityException) {
-            Log.e(TAG, "Notification permission might be missing.", e)
         }
     }
 

@@ -1,11 +1,9 @@
 package com.example.energysaving
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
-import android.util.Log // Keep for now, or remove if no longer needed
+
 
 class DeviceDetailActivity : AppCompatActivity() {
 
@@ -15,12 +13,8 @@ class DeviceDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.device_detail_activity)
-
         dbHelper = DevDBHelper(this)
-
-        // Assign the value from the Intent to the member variable
         selectedDeviceTypeCategory = intent.getStringExtra("device_type")
-        Log.d("DeviceDetailDebug", "selectedDeviceTypeCategory (onCreate): $selectedDeviceTypeCategory") // Keep this log for initial check
 
         val etSpecificDeviceName = findViewById<EditText>(R.id.etDeviceName)
         val etAdditionalDescription = findViewById<EditText>(R.id.etDeviceDescription)
@@ -50,7 +44,7 @@ class DeviceDetailActivity : AppCompatActivity() {
             }
 
             val success = dbHelper.insertDevice(
-                selectedDeviceTypeCategory!!, // Use '!!' because validation ensures it's not null/blank
+                selectedDeviceTypeCategory!!,
                 specificDeviceName,
                 watt,
                 hoursGoal,
@@ -60,7 +54,7 @@ class DeviceDetailActivity : AppCompatActivity() {
 
             if (success) {
                 Toast.makeText(this, "Device added", Toast.LENGTH_SHORT).show()
-                finish() // Go back to the previous activity (DeviceTypeActivity)
+                finish()
             } else {
                 Toast.makeText(this, "Failed to add device", Toast.LENGTH_SHORT).show()
             }

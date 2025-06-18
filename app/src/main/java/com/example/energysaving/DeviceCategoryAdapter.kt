@@ -5,11 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import android.util.Log // For debugging
 
 class DeviceCategoryAdapter(
     private val deviceCategories: List<String>,
-    private val onCategorySelected: (String) -> Unit // Callback for when a category is clicked
+    private val onCategorySelected: (String) -> Unit
 ) : RecyclerView.Adapter<DeviceCategoryAdapter.CategoryViewHolder>() {
 
     class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,7 +24,6 @@ class DeviceCategoryAdapter(
         val category = deviceCategories[position]
         holder.tvDeviceCategoryName.text = category
         holder.itemView.setOnClickListener {
-            Log.d("DeviceCategoryAdapter", "Selected category: $category")
             onCategorySelected(category)
         }
     }

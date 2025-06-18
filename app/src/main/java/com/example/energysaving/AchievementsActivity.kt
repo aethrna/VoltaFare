@@ -62,20 +62,15 @@ class AchievementsActivity : BaseActivity() {
     }
 
     private fun checkAndUnlockAchievements() {
-        Log.d(TAG, "--- Running Achievement Check ---")
-
         val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
         val currentUserProfile = userDbHelper.getUserProfile(currentUserId)
         val currentUserXp = currentUserProfile[DBHelper.COLUMN_XP]?.toIntOrNull() ?: 0
 
         if (allAchievements.isEmpty()){
-            Log.d(TAG, "Achievement list is empty. Cannot check for unlocks.")
             return
         }
 
         for (achievement in allAchievements) {
-            Log.d(TAG, "Checking '${achievement.title}': isUnlocked=${achievement.isUnlocked}, Progress=${achievement.progressCurrent}/${achievement.progressTarget}")
-
             if (!achievement.isUnlocked) {
                 var newProgress = achievement.progressCurrent
                 var shouldUnlock = false
@@ -84,19 +79,16 @@ class AchievementsActivity : BaseActivity() {
                     "first_device_ach" -> {
                         val deviceCount = devDbHelper.getAllDevicesForUser(currentUserId).size
                         if (deviceCount >= 1) {
-                            Log.d(TAG, "✅ Condition MET for 'first_device_ach'")
                             newProgress = 1
                             shouldUnlock = true
                         }
                     }
                     "eco_curious_ach" -> {
-                        Log.d(TAG, "✅ Condition MET for 'eco_curious_ach'")
                         newProgress = 1
                         shouldUnlock = true
                     }
                     "watt_a_legend_ach" -> {
                         if (currentUserXp >= achievement.progressTarget) {
-                            Log.d(TAG, "✅ Condition MET for 'watt_a_legend_ach'")
                             newProgress = achievement.progressTarget
                             shouldUnlock = true
                         } else {
@@ -105,22 +97,17 @@ class AchievementsActivity : BaseActivity() {
                     }
                 }
                 if (shouldUnlock) {
-                    Log.d(TAG, "➡️ Attempting to UNLOCK '${achievement.title}' in the database...")
                     val unlockedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                     val success = devDbHelper.updateAchievementStatus(currentUserId, achievement.defId, true, newProgress, unlockedDate)
-                    Log.d(TAG, "Database update success for '${achievement.title}': $success")
                     if(success){
                         Toast.makeText(this, "Achievement Unlocked: ${achievement.title}!", Toast.LENGTH_LONG).show()
                     }
                 }
                 else if (newProgress > achievement.progressCurrent) {
-                    Log.d(TAG, "➡️ Attempting to UPDATE PROGRESS for '${achievement.title}' to $newProgress")
                     val success = devDbHelper.updateAchievementStatus(currentUserId, achievement.defId, false, newProgress, "")
-                    Log.d(TAG, "Database update success for '${achievement.title}': $success")
                 }
             }
         }
-        Log.d(TAG, "--- Achievement Check Finished. Reloading list. ---")
         loadAchievements()
     }
 

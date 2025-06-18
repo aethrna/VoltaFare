@@ -18,14 +18,11 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.text.SimpleDateFormat
 import java.util.*
 
-// 1. Change this to extend BaseActivity
 class MainActivity : BaseActivity() {
 
-    // 2. This is required by BaseActivity to highlight the correct nav icon
     override val activeIndicator: Int
         get() = R.id.navItemHome
 
-    // --- Views SPECIFIC to MainActivity ---
     private lateinit var dbHelper: DevDBHelper
     private lateinit var userDbHelper: DBHelper
     private lateinit var greetingText: TextView
@@ -35,12 +32,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // This will call the overridden setContentView in BaseActivity,
-        // which automatically sets up the navigation bar for us.
         setContentView(R.layout.activity_main)
-
-        // Initialize only the views for THIS screen.
-        // All navigation view properties and setup functions have been removed.
         dbHelper = DevDBHelper(this)
         userDbHelper = DBHelper(this)
         greetingText = findViewById(R.id.tvGreeting)
@@ -52,7 +44,6 @@ class MainActivity : BaseActivity() {
             startActivity(Intent(this, DashboardActivity::class.java))
         }
 
-        // Setup the content for this screen
         updateUserProfile()
         setupRecyclerViewLayout()
         updateRecyclerViewData()
@@ -61,7 +52,6 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        // When returning, just refresh the data
         updateUserProfile()
         updateRecyclerViewData()
         setupWeeklyEnergyChart()
@@ -69,7 +59,6 @@ class MainActivity : BaseActivity() {
 
     private fun setupRecyclerViewLayout() {
         recyclerViewDevices.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        // Prevent attaching the helper more than once
         if (recyclerViewDevices.onFlingListener == null) {
             val snapHelper = PagerSnapHelper()
             snapHelper.attachToRecyclerView(recyclerViewDevices)
@@ -106,7 +95,6 @@ class MainActivity : BaseActivity() {
         dateTextView.text = currentDate
     }
 
-    // groupDevices and setupWeeklyEnergyChart functions remain the same
     private fun groupDevices(devices: List<Device>): List<DeviceGroup> {
         val groupedDevices = mutableListOf<DeviceGroup>()
         val typeGroups = devices.groupBy { it.name }
@@ -120,7 +108,6 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupWeeklyEnergyChart() {
-        // This function remains exactly as it was in your previous version
         val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val currentUserId = prefs.getString("currentUserId", null)
 

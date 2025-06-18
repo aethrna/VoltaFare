@@ -21,7 +21,7 @@ class DeviceTypeActivity : AppCompatActivity() {
     private lateinit var deviceCategoryRecyclerView: RecyclerView
     private lateinit var finishBtn: Button
 
-    private var isExpanded = false // To track the state of the collapsible section
+    private var isExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,31 +32,23 @@ class DeviceTypeActivity : AppCompatActivity() {
         deviceCategoryRecyclerView = findViewById(R.id.deviceCategoryRecyclerView)
         finishBtn = findViewById(R.id.btnFinish)
 
-        // Setup RecyclerView for categories
+
         deviceCategoryRecyclerView.layoutManager = LinearLayoutManager(this)
         val adapter = DeviceCategoryAdapter(deviceCategories) { selectedCategory ->
-            // Callback when a category item is clicked
             val intent = Intent(this, DeviceDetailActivity::class.java)
-            intent.putExtra("device_type", selectedCategory) // Pass the selected category name
+            intent.putExtra("device_type", selectedCategory)
             startActivity(intent)
-            // Optionally, collapse the list after selection
             toggleCollapsibleSection()
-            // finish() // Consider if you want to finish this activity or keep it on stack
         }
         deviceCategoryRecyclerView.adapter = adapter
 
-        // Set initial state of the arrow
-        imgExpandCollapseArrow.rotation = if (isExpanded) 90f else 0f // 90f for pointing down when expanded
+        imgExpandCollapseArrow.rotation = if (isExpanded) 90f else 0f
 
-        // Set click listener for the header to toggle the section
         collapsibleHeader.setOnClickListener {
             toggleCollapsibleSection()
         }
 
-        // The "Finish" button can be repurposed or removed if selections lead directly to DeviceDetailActivity
-        // For now, let's keep it and have it lead to MainActivity, marking user as not new
         finishBtn.setOnClickListener {
-            // Mark user as not new
             val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
             prefs.edit { putBoolean("isNewUser", false) }
 

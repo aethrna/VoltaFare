@@ -11,7 +11,7 @@ import androidx.core.content.edit // For SharedPreferences KTX
 
 class RegisterActivity : AppCompatActivity() {
 
-    private lateinit var dbHelper: DBHelper // Assuming this is your user DB helper
+    private lateinit var dbHelper: DBHelper
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +39,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         registerButton.setOnClickListener {
-            val username = usernameEditText.text.toString().trim() // Assuming username is email
+            val username = usernameEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
             val confirmPassword = confirmEditText.text.toString().trim()
 
@@ -47,31 +47,29 @@ class RegisterActivity : AppCompatActivity() {
                 messageText.text = "All fields are required."
             } else if (password != confirmPassword) {
                 messageText.text = "Passwords do not match."
-            } else if (dbHelper.checkEmailExists(username)) { // Assuming checkEmailExists is for username/email
+            } else if (dbHelper.checkEmailExists(username)) {
                 messageText.text = "Username already exists."
             } else {
-                val success = dbHelper.registerUser(username, password, "VoltaUser") // Pass username as initial display name
+                val success = dbHelper.registerUser(username, password, "VoltaUser")
                 if (success) {
-                    // *** IMPORTANT: Clear old session data and reset isNewUser flag ***
                     val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
                     prefs.edit {
                         putBoolean("isNewUser", true)
                         putBoolean("isLoggedIn", false)
                         putBoolean("userWantsToStayLoggedIn", false)
                         remove("email")
-                        remove("currentUserId") // <<< --- ADD THIS LINE
+                        remove("currentUserId")
                         apply()
                     }
 
                     messageText.setTextColor(getColor(android.R.color.holo_green_dark))
-                    messageText.text = "Registration successful! Please login." // Updated message
-                    Handler(Looper.getMainLooper()).postDelayed({ // Use Looper.getMainLooper()
-                        // Go to StartActivity, so user has to log in with new credentials
+                    messageText.text = "Registration successful! Please login."
+                    Handler(Looper.getMainLooper()).postDelayed({
                         val intent = Intent(this, LoginActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         startActivity(intent)
-                        finish() // Clear this activity and its parent stack if any
-                    }, 2000) // Increased delay slightly for message visibility
+                        finish()
+                    }, 2000)
                 } else {
                     messageText.text = "Registration failed. Try again."
                 }

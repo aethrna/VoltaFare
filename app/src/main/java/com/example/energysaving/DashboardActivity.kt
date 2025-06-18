@@ -185,7 +185,14 @@ class DashboardActivity : BaseActivity() {
     }
 
     private fun showTitleSelectionDialog() {
-        val currentUserId = ""
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val currentUserId = prefs.getString("currentUserId", null)
+
+        if (currentUserId == null) {
+            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val allAchievements = devDbHelper.getAllAchievementsForUser(currentUserId)
         val unlockedAchievements = allAchievements.filter { it.isUnlocked }
         if (unlockedAchievements.isEmpty()) {
@@ -209,7 +216,12 @@ class DashboardActivity : BaseActivity() {
     }
 
     private fun updateUserDisplayTitle(newTitle: String) {
-        val currentUserId = ""
+        val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val currentUserId = prefs.getString("currentUserId", null)
+        if (currentUserId == null){
+            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (dbHelper.updateUserProfileField(currentUserId, DBHelper.COLUMN_DISPLAY_TITLE, newTitle)) {
             Toast.makeText(this, "Title updated successfully!", Toast.LENGTH_SHORT).show()
             loadUserProfile()
